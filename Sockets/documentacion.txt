@@ -981,16 +981,6 @@ Unidad 2 -> Aplicaciones clientes-servidor con sockets en python
 					
 					- Implementar un crawler de enlaces mediante BeautifulSoup.
 
-		
-
-
-
-Unidad 5 pág 14 falta entregar un ejercicio. extraer_pdf_metadatos.py			
-
-Unidad 6 pág 10 falta entregar un ejercicio. obtener_images_lxml.py
-Unidad 6 pág 13 falta entregar un ejercicio. obtener_dominios_iewdns.py 		
-
-
 
 
 
