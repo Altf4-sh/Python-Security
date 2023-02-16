@@ -1,0 +1,1013 @@
+
+                                *****************************           DOCUMENTACIÓN           *****************************
+
+
+Unidad 1 -> Trabajando con sockets en Python 
+
+    1.1 Breve introducción a los sockets: 
+
+        - Los sockets de red son una manera fácil de establecer una comunicación entre procesos que están en la misma máquina o en máquinas diferentes.
+        - Una dirección de socket de red consta de una dirección IP y un número de puerto. El objetivo de un socket es comunicar procesos a través de la red.
+        - Los programas utilizan sockets para comunicarse con otros programas, que pueden estar situados en computadoras distintas.
+
+        Los sockets los podemos clasificar en dos grandes categorías:
+
+            - Los de flujo, TCP     --> socket.SOCK_STREAM ( ES EL QUE VAMOS A USAR )
+            - Los de diagramas, UDP --> socket.SOCK_DGRAM
+
+
+    1.2 Creación de un socket:
+
+        Para crer un socket se usa el constructor socket.socket(), el cual puede tomar parámetros opcionales que son:
+            - Familia
+            - Tipo
+            - Protocolo
+
+        Por defecto se utiliza la familia AF_INET y el tipo SOCK_STREAM.
+
+        Asi se vería en Python --> s = socket.socket (socket_family, socket_type, protocol = 0)
+        
+        Los sockets también se pueden claseficar por la familia:
+
+            - Socket UNIX -> socket.AF_UNIX. Se crearon antes de la concepción de las redes y se basan en ficheros.
+            - Socket -> socket.AF_INET, el que nos interesa.
+            - Socket -> socket.AF_INET6 para IPv6.
+
+
+     1.3 Módulo socket en python:
+
+        Por defecto se instala cuando instalamos python, una manera de comprobarlo es la siguiente:
+        ( Esto desde el intérprete de python )
+            import socket
+            
+            dir(socket)   
+
+
+    1.4 Recopilación de información con sockets:
+
+        Los métodos útiles para recopilar más información son:
+
+            - socket.gethostbyname(hostname)          -> Obtenemos una direccion IP a partir de un nombre de dominio.
+            - socket.gethostbyaddr(ip_address)        -> Obtenemos un nombre de dominio a partir de una direccion IP.
+            - socket.gethostbyname_ex(hostname)       -> Obtenemos muchas direcciones IP a partir de un solo nombre de dominio
+            - socket.getservbyname (nombre_protocolo) -> Obtenemos el numero del puerto a partir del nombre del puerto.
+            - socket.getservbyport(puerto)            -> Obtenemos el nombre del puerto a partir del número del puerto.
+
+
+    1.5 Implementar en Python un escáner de puertos con sockets
+
+        De manera fácil podemos verificar si un puerto específico está abierto, cerrado o filtrado al llamar al método -> connect_ex().
+        El método -> socket.connect_ex(dirección,puerto) se usa para implementar el escaneo de puertos con sockets.
+
+
+    1.6 Implementar en Python un servidor HTTP
+
+        Métodos de socket del servidor:
+
+            - socket.bind(dirección) -> Este método nos permite conectar la dirección con el socket, 
+            con el requisito de que el socket debe estar abierto antes de establecer la conexión con la dirección.
+
+            - socket.listen(numero_conexiones) -> Este método acepta como parámetro el número máximo de conexiones de los clientes 
+            e inicia la escucha TCP para las conexiones entrantes.
+
+            - socket.accept() -> Este método nos permite aceptar conexiones del cliente. 
+            Este método devuelve dos valores: client_socket y la dirección del cliente. client_socket es un nuevo objeto de socket utilizado para enviar y recibir datos. 
+            Antes de usar este método, debe llamar a los métodos socket.bind(dirección) y socket.listen(numero_conexiones).
+
+        Implementación del servidor:
+
+            - Podemos usar el método bind() que acepta como parámetros la dirección IP y el puerto.
+            - Con listen() podemos establecer el número máximo de conexiones. Ej: mysocket.listen(5)
+            - La lógica del servidor, con acept() podemos aceptar las peticiones de los clientes, leer datos entrantes con recv() y responderemos con 
+            un HTML con el método send(). 
+
+***********************************************************************************************************************************************************************
+
+Unidad 2 -> Aplicaciones clientes-servidor con sockets en python
+
+    2.1 Métodos para enviar y recibir datos entre un cliente y un servidor
+
+        - socket.recv(buffer)             -> Con este método recibimos datos del socket. Su argumento indica la cantidad máxima de datos que puede recibir.
+        - socket.recvfrom(buffer)         -> Con este método recibimos datos y la dirección del remitente.
+        - socket.recv_into(buffer)        -> Con este método recibimos datos en un buffer. 
+        - socket.recvfrom_into(buffer)    -> Con este método recibimos datos en un buffer.
+        - socket.send(bytes)              -> Con este método enviamos datos de bytes al destino especificado.
+        - socket.sendto(datos, dirección) -> Con este método enviamos datos a una dirección determinada.
+        - socket.sendall(datos)           -> Con este método enviamos todos los datos en el buffer.
+        - socket.close()                  -> Con este método liberamos la memoria y finalizamos la conexión.
+
+            NOTA: El buffer es un espacio temporal de memoria física el cual se usa para almacenar información mientras se envía de un lado a otro.
+
+    2.2 Métodos de socket del servidor
+
+        - socket.bind(dirección)           -> Nos permite conectar la dirección con el socket con la condición de que el socket debe de estar ya abierto.
+        - socket.listen(numero_conexiones) -> Su parámetro indica el máximo número de conexiones cliente que se pueden aceptar. Su escucha es TCP.
+        - socket.accept()                  -> Nos permite aceptar las conexiones de los clientes. Devuelve 2 valores:
+            |
+            |-> client_socket -> Antes de ser usado debe haber llamado previamente a socket.bind(dirección) y socket.listen(numero_conexiones)
+            |-> Direccion del cliente.
+
+
+    2.3 Métodos de socket del cliente
+
+        - socket.connect(ip_address) -> Este método conecta al cliente a la dirección IP del servidor. Hace lo mismo que el método connect_ex() y también ofrece
+        la posibilidad de lanzar un error en caso de no poder conectar con el servidor.
+
+    
+    2.4 Administrar excepciones de socket
+
+        - exception socket.timeout  -> Este bloque captura excepciones relacionadas con el vencimiento de los tiempos de espera.
+        - exception socket.gaierror -> Este bloque detecta errores durante la búsqueda de información sobre direcciones IP. Ej: cuando usamos los métodos getaddrinfo() y getnameinfo().
+        - exception socket.error    -> Este bloque detecta errores genéricos de entrada y salida y comunicación.
+
+    2.5 Creando un cliente y un servidor TCP con sockets
+
+        - Servidor:
+            |
+            | -> Lo primero es crear el socket del servidor                    >> servidor = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
+              Ahora hay que asignarle el puerto de escucha argunmento bind     >> socket_s.bind(("localhost", 9999))
+              Usamos un par de argumentos para escuchar y aceptar los clientes >> socket_s.listen(10) y socket_s.accept()
+              Para enviar y recibir datos del socket usamos recv() y send()    >> recibido = socket_cliente.recv(1024), print("Recibido: ", recibido) y socket_cliente.send(recibido)
+              Para finalizar cerramos el socket                                >> socket_s.close()
+
+
+        - Cliente:
+            |
+            | -> Es mucho mas sencillo que el servidor >> socket_cliente = socket.socket(), socket_cliente.connect(("localhost", 9999)) y socket_cliente.send("hola")
+
+
+    2.6 Shell inversa con sockets
+
+        - Una Shell inversa se trata de acción mediante la cual un usuario consigue acceder a la shell de un servidor externo.
+        - En este caso estamos utilizando dos nuevos módulos: os y subprocess.
+        - Necesitamos establecer la conexión con nuestro socket a través de la salida del comando. Esto lo logramos con la instrucción: os.dup2(sock.fileno())
+
+
+***********************************************************************************************************************************************************************
+
+    Unidad 3 -> Módulos para realizar peticiones con Python
+
+        3.1 Protocolo HTTP y creación de clientes HTTP en python
+
+            - HTTP es un protocolo de capa de aplicación que básicamente consta de dos elementos: una solicitud realizada por el cliente, 
+            que solicita al servidor un recurso específico especificado por una URL, y una respuesta, enviada por el servidor, que suministra el recurso que el cliente ha solicitado.
+            - El protocolo http es un protocolo de transferencia de datos de hyper-texto, sin estado que no almacena la información.
+            - Al ser un protocolo sin estado para poder almacenar información relativa a una transacción HTTP hay que recurrir a otras técnicas como cookies o sesiones.
+            - Los servidores devuelven un código HTTP que indica el resultado de una operación solicitada por el cliente.
+            - Se pueden utilizar cabeceras(headers) en las peticiones para incluir información extra tanto en peticiones como en respuestas.
+
+                Métodos:
+
+                    GET ->  Pide una representación del recurso especificado. 
+                        Por seguridad no debería ser usado por aplicaciones que causen efectos ya que transmite información a través de la URI agregando parámetros a la URL.
+
+                    HEAD -> Pide una respuesta idéntica a la que correspondería a una petición GET, pero en la petición no se devuelve el cuerpo. 
+                        Esto es útil para poder recuperar los metadatos de los encabezados de respuesta, sin tener que transportar todo el contenido.
+
+                    POST -> Envía los datos para que sean procesados por el recurso identificado. 
+                        Los datos se incluirán en el cuerpo de la petición. Esto puede resultar en la creación de un nuevo recurso o 
+                        de las actualizaciones de los recursos existentes o ambas cosas.
+
+
+            - Python proporciona una serie de módulos para crear un cliente HTTP. Los módulos que proporciona Python en la biblioteca estándar son httplib.client, urllib.request. 
+
+            - Una instancia de la clase -> HTTPConnection, representa una transacción con un servidor HTTP. Debe iniciarse pasando el host (obligatorio) y el puerto (opcional).
+            Si no se especifica el número de puerto, este será por defecto el 80.
+
+        
+        3.2 Construyendo un cliente HTTP con urllib.request
+
+            - urllib puede leer datos de una URL usando varios protocolos, como HTTP, HTTPS, FTP o Gopher.
+            - Este objeto tiene métodos como read(), readline(), readlines() y close(), que funcionan exactamente igual que en los objetos de archivo.
+            - Este objeto tiene métodos como read(), readline(), readlines() y close(), que funcionan exactamente igual que en los objetos de archivo.
+            - Podemos administrar errores del módulo urllib con el URLError y si trabajamos con HTTP con el HTTPError.
+            - Los estados de una respuesta nos da información sobre la respuesta. En la siguiente URL podemos saber mas sobre los estados:
+           
+            Estados -> https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
+
+
+        3.3 Comprobación de cabeceras HTTP con urllib.request
+
+            - Las peticiones HTTP constan de dos partes principales: cabeceras y un cuerpo.
+            - La declaración http_response.headers proporciona las cabeceras de respuesta del servidor web.
+            - Es importante verificar si el código de respuesta es igual a 200, indicando que la respuesta es OK.
+        
+		
+        3.4 Personalización de cabeceras con urllib
+
+            - Usaremos User-Agent para personalizar nuestras cabeceras.
+            - Podríamos personalizar la cabeceras que se envían para recuperar una versión específica de un sitio web.
+			- User-Agent es un encabezado que se utiliza para identificar el navegador y el sistema operativo que estamos utilizando para realizar peticiones a un determinado dominio.
+			- Por defecto se identifica como -> "Python-urllib/version".
+			- Si queremos identificarnos, por ejemplo, como un navegador Chrome, reamos la misma solicitud GET 
+			utilizando la clase Request pasando como parámetro una cabecera de User-Agent HTTP personalizada.
+			
+			
+		3.5 Módulo urllib3
+		
+			- Permite externder las funcionalidades de urllib, permitiendo aprovechar las caracteristicas avanzadas del protocolo HTTP 1.1.
+			- La caracteristica mas importante es la de reutilizacion de conexiones TCP para realizar multiples peticiones y que
+			soporta la validación de certificados en conexiones HTTPS.
+			- Otra caracteristica interesante es que podemos indicar el numero conexiones que vamos a reservar en la pool, mediante la clase PoolManager.
+			- Para realizar este tipo de peticiones usamos el request del objeto pool. Este metodo acepta como parámetros (GET,POST) y la URL del dominio.
+			- La respuesta se obtiene en el objeto response, el cual si accedemos a su response.status, nos devolverá el estado de la peticion, ej: 200 OK.
+		
+		
+		3.6 Crear un cliente HTTP con requests
+			
+			- La mejor forma que tiene python para interactuar con un API REST es mediante una libreria de terceros requests: pip install requests
+			- Contamos con los métodos "POST", "GET", "PUT", "PATCH", "DELETE" que son todos los métodos disponibles para comunicarse con una API RESTful.
+			- El metodo request.get() devuelve un objeto response con toda la respuesta, podemos usar las siguientes funciones para obtener mas datos:
+				- response.status_code -> obtiene el código HTTP devuelto por el servidor.
+				- response.content 	   -> Contenido de la respuesta del servidor.
+				- response.json()      -> Serializa y devuelve una cadena con la estructura del JSON. En caso contrario devolvera una excepcion para cada respuesta.
+			- También podemos acceder a las propiedades de las cabeceras a través del objeto de respuesta donde podemos ver que el user-agent. 
+			
+
+		3.7 Obtener cabeceras con el módulo requests
+		
+			- Para ver las cabeceras de la respuesta y de la petición usamos el objeto response.
+			- La instruccion response.headers proporciona las cabeceras de la respuesta del servidor web. La respuesta al ser un diccionario de objetos, con el método items(),
+			podemos iterar y acceder a las diferentes cabeceras.
+			- De la misma manera podemos obtener solo las claves con el metodo keys().
+			- El modulo request facilita el uso de peticiones HTTP en python mejor que urllib.
+			
+			Ventajas del metodo requests:
+			
+				- Una biblioteca enfocada en la creación de clientes HTTP completamente funcionales.
+				- Soporta todos los métodos y características definidos en el protocolo HTTP.
+				- Es "Pythonic", es decir, está completamente escrito en Python y todas las operaciones se realizan de manera simple y con solo unas pocas líneas de código.
+				- Tareas como la integración con servicios web, la creación de un pool de conexiones HTTP, la codificación de datos POST en formularios y el manejo de cookies, se manejan automáticamente.
+				- Se trata de una librería que implementa las funcionalidades de urllib3 y las extiende.
+
+		3.8 Realizar peticiones GET a una API REST
+		
+			- Para probar a realizar peticiones con este módulo podríamos usar el servicio http://httpbin.org, ejecutando cada tipo de petición por separado.
+		
+		3.9 Realizar peticiones POST a una API REST
+		
+			- En las peticiones POST parte de la informacion la enviamos  a través del atributo de datos a través de una estructura de diccionario.
+			- Requiere un campo adicional "data" en el que enviamos el diccionario con todos los elementos que enviaremos al servidor.
+			- Podemos simular el envio de un formulario HTML como lo hacen los sitios web.
+			- Hay casos en los que se requiere que la solicitud contenga cabeceras que indiquen que nos estamos comunicando con el formato JSON.
+			- Podemos añadir nuestras propias cabeceras o modificar los existentes con el parámetro "headers".
+			- Otras de las acciones que podemos hacer con el método POST con el módulo requests es modificar las cabeceras (headers) de la petición enviando información adicional. 
+			- En la respuesta podemos ver que la cabecera que hemos definido se añade junto con las definidas por defecto.
+			
+			
+		3.10 Realizar peticiones mediante un proxy
+
+			- Una característica interesante que ofrece el módulo de requests es la posibilidad de realizar peticiones a través de un proxy entre nuestra red interna y la red externa.
+			- Se define de la siguiente manera -> proxy = {"protocol":"ip:port", ...}
+			- Para realizar una petición a través de un proxy, se utiliza el atributo proxies del método get: response = requests.get(url,headers=headers,proxies=proxy)
+			- El objeto proxy debe pasarse en forma de diccionario, es decir, especificamos el protocolo junto con la dirección IP y el puerto donde escucha el proxy:
+
+			import requests
+			http_proxy = "http://<direccion_ip>:<puerto>"
+			proxy_dictionary = { "http" : http_proxy}
+			requests.get("http://dominio.org", proxies=proxy_dictionary)
+			
+				
+		3.11 Gestionar excepciones con el módulo requests
+
+			- Los errores en el módulo requests se manejan de manera diferente a otros módulos.
+			- Para ver la excepción generada internamente, podemos usar el método raise_for_status().
+			- response = requests.get('http://url_not_exists')
+			requests.exceptions.ConnectionError: HTTPConnectionPool(host='url_not_exists', port=80): Max retries exceeded with url: 
+			/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f6ecaddd760>: Failed to establish a new connection: 
+			[Errno -2] Name or service not known'))
+
+
+			RESUMEN
+
+				En esta unidad hemos aprendido:
+
+					- Establecer la conexión con un host con módulo http.client utilizando la clase http.client.HTTPConnection.
+					- Establecer la conexión con un host con módulo urllib.request utilizando el método urlopen(), incluyendo la obtención del código de estado, 
+					cabeceras de la respuesta y de la petición a partir el objeto de respuesta response.
+					- Obtener información de las cabeceras de la respuesta y de la petición de diferentes formas como utilizando los métodos info() y getheaders().
+					- Personalizar las cabeceras que se envían en la petición a través del parámetro headers urllib.request.Request(url,headers=headers).
+					- Extraer información de una página web como enlaces e imágenes utilizando el módulo re para expresiones regulares.
+					- Establecer la conexión con un host con módulo urllib3 utilizando la clase PoolManager.
+					- Establecer la conexión con un dominio con módulo requests utilizando el método get(), 
+					incluyendo la obtención del código de estado, cabeceras de la respuesta y de la petición con el objeto de respuesta.
+					- Realizar una petición a una API Rest utilizando el módulo request a través de los métodos get() y post().
+
+
+***********************************************************************************************************************************************************************
+
+
+	Unidad 4 -> Recolección de información de servidores con Python
+
+		
+		4.1 Utilizando Shodan para la obtención de información de un servidor
+
+			- Shodan es un motor de búsqueda que se encarga de rastrear servidores y diversos tipos de dispositivos en Internet.
+			- Shodan es un proyecto que escanea el direccionamiento público de internet en más de 200 puertos y si encuentra puertos abiertos, 
+			guarda la respuesta (banner) que dan estas ips por estos puertos.
+			- Esta información es accesible vía web, línea de comando, API o por lenguajes de programación.
+			- La principal diferencia con respecto a otros buscadores es recorre internet escaneando cada dirección IP, obteniendo los servicios en ejecución y los puertos que tiene abiertos.
+			- Por ejemplo si queremos buscar servidores DNS podríamos realizar la búsqueda por el puerto 53: port:53
+			- Plugin de shodan para chrome: https://chrome.google.com/webstore/detail/shodan/jjalcfnidlmpjhdfepjhjbhnhkbgleap?utm_source=chrome-ntp-icon
+		
+
+		4.2 Filtros en Shodan
+
+			- Estos filtros nos pueden ayudar a realizar una búsqueda con más detalle valiéndose para ello de los metadatos que los dispositivos o servicios otorgan.
+			- Su potencial real viene con las consultas personalizadas:
+				- after/before -> filtra los resultados por fecha.
+				- country 	   -> filtra los resultados por código de país de 2 dígitos.
+				- city 		   -> filtra los resultados por ciudad.
+				- geo 		   -> filtra los resultados por latitud/longitud.
+				- hostname     -> filtra los resultados por host o nombre de dominio.
+				- net 		   -> filtra los resultados por un rango específico de ips o un segmento de red.
+				- os 		   -> realiza la búsqueda para un determinado Sistema operativo.
+				- port 		   -> permite filtrar por número de puerto.
+			- Ejemplos:
+				- Servidores apache de Londres -> apache city:"London"
+				- Servidores ssh de uk         -> ssh country:uk
+
+	
+		4.3 Servicios de Shodan
+
+			- Servicio de mapas 				  -> Shodan dispone de un dashboard https://exposure.shodan.io donde podemos ver un resumen de los puertos y servicios expuestos para un país concreto.
+			- HoneyScore 						  -> https://honeyscore.shodan.io/ permite comprobar si una determinada dirección IP es un honeypot.
+			- Shodan CLI "Command Line Interface" -> https://cli.shodan.io proporciona una manera de realizar búsquedas en Shodan desde línea de comandos. Se necesita iniciar el programa con la API key.
+			- Servicios de exploits 			  -> Shodan ofrece buscar exploits desde distintas bases de datos de vulnerabilidades. https://exploits.shodan.io/welcome
+			- Servicio de imágenes 				  -> Proporcionar un contexto más amplio en torno a los resultados. Muestran que pantallas de inicio de sesion están disponibles.
+			- Shodan monitor 					  -> Herramienta diseñada para permitir a los usuarios llevar un seguimiento directo y sencillo de sus dispositivos. Recibiendo recomendaciones de seguridad 
+			y notificaciones en tiempo real cuando uno de sus dispositivos se exponga en la red. https://monitor.shodan.io/
+			- Hay que recalcar que Shodan recoge la información que le devuelve la máquina, y nada le impide a esa máquina falsear esta información.
+			- La información que nos da Shodan la usaremos como primera búsqueda que después tendremos que verificar.
+
+		4.4 Shodan API REST
+
+			- API REST de shodan -> https://developer.shodan.io/api
+			- Podemos usar los endpoint que aparecen en la documentación y concatenando como parámetros el API KEY y la consulta a realizar.
+			- Quedaría así -> https://api.shodan.io/shodan/host/search?key={YOUR_API_KEY}&query={query}
+			- Para realizar las peticiones correctamente es necesario indicarle el API_KEY que hemos obtenido cuando nos hemos registrado.
+			- Ejemplo de búsqueda con la cadena apache -> https://api.shodan.io/shodan/host/search?key=<API_KEY>&query=apache
+			- Una posible salida en formato JSOn podria ser la siguiente:
+
+				{'region_code': None,
+				'ip': 134744072, 
+				'postal_code': None, 
+				'country_code': 'US', 
+				'city': None, 
+				'dma_code': None, 
+				'last_update': '2020-06-09T14:42:14.527189', 
+				'latitude': 37.751, 
+				'tags': [], 
+				'area_code': None, 
+				'country_name': 'United States', 
+				'hostnames': ['dns.google'], 
+				'org': 'Google', 
+				'data': [], 
+				'asn': 'AS15169', 
+				'isp': 'Google', 
+				'longitude': -97.822, 
+				'country_code3': None, 
+				'domains': ['dns.google'], 
+				'ip_str': '8.8.8.8', 
+				'os': None, 
+				'ports': [53]}
+		
+
+		4.5 Acceso a Shodan desde Python
+
+			- La librería oficial de shodan en lenguaje python está disponible en el repositorio de Github: https://github.com/achillean/shodan-python
+			- Para instalar el módulo de Python lo podemos hacer con el comando: pip install shodan
+			- Para inicializar la herramienta es necesario indicarle el API KEY con el comando: shodan init <API_key&gt;
+			- Comandos:
+				- shodan host   -> permite visualizar información sobre un host, conocer su geolocalización, puertos que están abiertos, y qué organización es propietaria de esa dirección IP.
+				- shodan search -> permite realizar una búsqueda en Shodan y visualizar los resultados en la terminal de manera amigable.
+			- Por defecto muestra la dirección IP, puerto, nombres del host y otros datos.
+			- Se puede utilizar el parámetro "--fields" para imprimir campos de banners en los cuales se está interesado. Ej: shodan search --fields ip_str,port,org,hostnames apache tomcat
+
+
+		4.6 Shodanploit
+
+			- Esta herramienta se trata de un script en python que contiene todas las llamadas a la API de shodan desde línea de comandos. https://github.com/shodansploit/shodansploit
+			- Con esta herramienta se puede tener todas las llamadas que hacemos a Shodan desde la terminal, lo unico añadir el API_KEY al iniciar el Script.
+			- Podemos crearnos nuestra propia clase para buscar por shodan que tenga como métodos el __init__  para inicializar el objeto de Shodan a partir de la API_ KEY.
+			- shodan.host() devuelve una búsqueda en modo diccionario la cual podemos recorrer con el metodo items() clave ---> valor
+
+			- Entre las propiedades que devuelve la llamada destacar:
+				- data -> una lista de banners que proporcionan detalles sobre los servicios que tenían un puerto abierto en dicho servidor.
+				- port -> una lista de puertos abiertos para la dirección ip proporcionada.
+				- tags -> Shodan hace validación extra para algunos servicios/dispositivos y tiene etiquetas especiales para facilitar la identificación de ciertos tipos de dispositivos. 
+					Ej: La etiqueta "ics" para identificar sistemas de control industrial. 
+
+
+		4.7 Utilizando Shodan para la obtención de información de un servidor FTP
+
+			- Shodan permite realizar una búsqueda de servidores que tengan un acceso FTP con usuario anónimo y se pueda acceder sin usuario y password.
+			- Búsqueda con la cadena -> "port: 21 Anonymous user logged in" obtenemos aquellos servidores ftp que son vulnerables por permitir el acceso anónimo.
+		
+
+		4.8 Shodan eye
+
+			- Esta herramienta recopila toda la información sobre todos los dispositivos que están directamente conectados a Internet con las palabras clave especificadas.
+			- URL de instalacion github -> https://github.com/BullsEye0/shodan-eye
+			- O tambien: 
+				 pip3 install shodan
+				 git clone https://github.com/BullsEye0/shodan-eye shodaneye
+				 cd shodaneye
+				 python3 shodan-eye.py
+
+
+
+		4.9 Consultas sin API Key (Mi API_KEY -> ydysiK0Jt21OntYOiUuR317dXHB5uI4v)
+	
+			- Hay que comentar que Shodan a partir de cierto límite de resultados para exportarlos hay que pagar.
+			- https://github.com/owlonex/Shodanfy.py Script para hacer peticiones sin necesidad de utilizar el API KEY.
+
+			IMPORTANTE -> El script utiliza técnicas de scraping para obtener la información aunque tiene el peligro que nos pueden banear la dirección ip. 
+			En el caso de querer probar el script recomiendo hacerlo conectado a través de un proxy o vpn con ip dinámica.
+
+
+		4.10 Utilizando el registro Whois para obtener información de un servidor
+
+			- El protocolo Whois que es el nombre del protocolo que se utiliza para preguntar a los servidores operados por registros regionales de internet 
+			y contienen información sobre cada recurso (dirección IP o nombre de dominio) registrado en internet.
+			- Podemos utilizar el protocolo WHOIS para ver quién es el propietario registrado del nombre de dominio.
+			- Permite obtener información sobre el dominio o sobre la dirección IP.
+			- La información devuelta incluye direcciones físicas, direcciones de correo electrónico, nombres y números de teléfono. 
+			También se muestran los servidores de nombres DNS de un dominio.
+			- Las consultas de whois pueden devolver información de historial de IP, fechas de caducidad del dominio e incluso números de teléfono.
+			- Servicios de registro de dominios para obtener el detalle:
+				- Whois lookup Hacktarget -> https://hackertarget.com/whois-lookup/
+				- Whois lookup API        -> https://whois.domaintools.com/
+			- Entre los principales casos de uso para una búsqueda Whois podemos destacar:
+
+				    - Respuesta a incidentes e inteligencia de amenazas: 
+						Las ventajas de una búsqueda whois para aquellos que responden a un incidente de seguridad es identificar el ISP (proveedor de servicios de internet) 
+						que posee una dirección IP particular. A partir de esta información, 
+						se puede contactar al propietario del dominio y avisar al proveedor de la presencia de cierto tráfico anómalo.
+
+					- Registros históricos de Whois que permiten que un analista busque detalles en los datos: 
+						Por ejemplo, se pueden buscar datos de whois para encontrar una dirección de correo electrónico 
+						en varios dominios y determinar cuándo apareció por primera vez la dirección de correo electrónico en un determinado registro.
+
+					- Solución de problemas de red con Whois: 
+						Especialistas de seguridad de redes que investigan una ruta a través de Internet puede ver si una red en particular está introduciendo una latencia significativa. 
+						Mediante una búsqueda en de un registro de whois, se puede determinar quién es el propietario de la red en cuestión y ponerse en contacto con los responsables de esa red.
+
+			- Documentacion domaintools.com -> https://www.domaintools.com/resources/api-documentation
+
+
+		4.11 Módulo python-whois
+
+			- Hay un módulo de Python llamado python-whois para este protocolo, cuya documentación podemos encontrar en los siguientes enlaces:
+				- Repositorio GitHub  -> https://github.com/richardpenman/whois
+				- Modulo python-whois -> https://pypi.org/project/python-whois/
+
+			- Si queremos consultar los servidores de nombres y el propietario de un determinado dominio lo podemos hacer con el modulo whois():
+
+					         import whois
+							 dominio = "www.python.org"
+						     whois = whois.whois(dominio) # Esto devuelve una estructura tipo diccionario --> clave >>> valor
+						     for key in whois.keys(): # Usamos la estructura for para recorrer el diccionario y mostrar sus claves.
+						        print ("%s : %s \n" %(key, whois[key])
+
+
+		4.12 Módulo ipwhois
+
+			- Otro de los módulos que podemos usar para obtener esta información es el módulo llamado ipwhois para este protocolo.
+				- Documentacion ip Whois -> https://ipwhois.readthedocs.io/en/latest/index.html Instalacion -> pip install ipwhois
+
+			- Si queremos consultar la informacion de un determinado dominio lo que tenemos que hacer es convertir el dominio en ip y luego realizar la consulta con lookup_whois().
+
+
+		4.13 Extracción de información de servidores DNS
+
+			- DNS son las siglas de Domain Name Server, servicio de nombres de dominio utilizado para relacionar direcciones IP con nombres de dominio.
+			-  DNS se utiliza para distintos propósitos. Los más comunes son:
+				- Se emplea para asignar un rango de ips a un único dominio.
+				- Resolución de nombres 		     ->  Dado el nombre completo de un host, obtener su dirección IP.
+				- Resolución inversa de direcciones  -> Es el mecanismo inverso al anterior. Consiste en, dada una dirección IP, obtener el nombre de host asociado a la misma.
+				- Resolución de servidores de correo -> Dado un nombre de dominio (por ejemplo gmail.com) obtener el servidor a través del cual debe realizarse la 
+				entrega del correo electrónico (por ejemplo, gmail-smtp-in.l.google.com).
+
+
+			- DNS también es un protocolo que los dispositivos usan para consultar a los servidores DNS con el objetivo de resolver nombres de host en direcciones IP.
+			- La herramienta nslookup viene con la mayoría de los sistemas Linux y Windows y nos permite realizar consultas DNS desde la línea de comandos.
+			- Ejemplo: 
+
+			   $ nslookup python.org
+
+					Server:         192.168.18.1
+					Address:        192.168.18.1#53
+
+					Non-authoritative answer:
+					Name:   python.org
+					Address: 45.55.99.72
+
+
+			- Servidores DNS:
+
+				- Los servidores DNS permiten la consulta de diferentes tipos de registros en los que se incluyen servidores de correo, direcciones IP, nombres de dominios y otros servicios.
+				- Algunos de los registros más utilizados son:
+					A    -->Permite consultar la dirección IPv4
+					AAAA -->Permite consultar la dirección IPv6
+					MX   -->Permite consultar los servidores de correo
+					NS   -->Permite consultar el nombre del servidor (Name Server)
+					TXT  -->Permite consultar información en formato texto
+
+
+		4.14 Módulo DNSPython
+
+			- Python dispone del módulo dnspython que permite realizar operaciones de consulta de registros contra servidores DNS.
+			- Documentacion DNS Python 		 -> https://www.dnspython.org/
+			- Respositorio GitHub DNS Python -> https://github.com/rthalley/dnspython
+
+			- Este módulo permite: (Instalacion -> pip install dnspython) Sus paquetes necesarios son -> import dns y dns.resolver
+				- Acceso a alto nivel por medio de consultas a registros DNS.
+				- Acceso a bajo nivel permitiendo la manipulación directa de zonas, mensajes, nombres y registros.
+
+			- La información que podemos obtener de un determinado dominio es:
+				- Registros para servidores de correo -> ansMX = dns.resolver.query("dominio","MX")
+				- Registros para servidores de nombre -> ansNS = dns.resolver.query("dominio","NS")
+				- Registros para direcciones IPV4     -> ansA = dns.resolver.query("dominio","A")
+				- Registros para direcciones IPV6     -> ansAAAA = dns.resolver.query("dominio","AAAA")
+
+			- En este ejemplo, estamos haciendo una consulta con respecto a la dirección IPv4 de del dominio python.org con el submódulo dns.resolver:
+
+					import dns.resolver
+
+					respuestas = dns.resolver.query('python.org', 'A')
+					for respuesta in respuestas:
+						print('IP', respuesta.to_text())
+
+			- Ejemplos de DNS python -> https://www.dnspython.org/examples.html
+
+
+		4.14.1 Otras operaciones con el módulo dnspython
+
+			- Con el módulo dnspython podemos comprobar si un dominio es subdominio de otro a través del método is_subdomain():
+
+				  import dns.resolver
+
+				  dominio1 = dns.name.from_text('dominio1')
+				  dominio2 = dns.name.from_text('dominio2')
+				  dominio1.is_subdomain(dominio2)
+
+
+			- Si desea realizar una búsqueda inversa, debe usar el submódulo dns.reversename, como se muestra en el siguiente ejemplo:
+
+				 import dns.reversename
+
+				 name = dns.reversename.from_address("ip_address")
+				 print(dns.reversename.to_address(name))
+
+
+		4.15 Servicios DNS
+
+			- Robtex se trata de un servicio considerado la navaja suiza de internet.
+			- Permite obtener, sin dejar rastro alguno en el objetivo, consultas sobre los dominios, subdominios, servidores DNS.
+			- Este tipo de consultas suelen categorizarse como footprinting activo, aunque, al realizarlo a través de este servicio, en realidad se lleva a cabo de manera pasiva.
+			- Disponemos también de una API que devuelve los datos de geolocalización y de red de una dirección ip
+			- Servicio DNS de Robtex -> https://www.robtex.com/dns-lookup/
+			- Tipo de informacion que proporciona Robtex:
+				- Búsqueda de DNS inversa 									      -> Permite buscar un número de IP para averiguar qué nombres de host lo apuntan. Funciona para DNS, MX y NS
+				- Buscar un número de IP y obtener qué nombres de host lo apuntan -> Esto funciona para DNS, MX y NS
+				- Información Whois 											  ->  Permite realizar búsquedas para un dominio registrado en varias bases de datos de whois. 
+				Principales datos: propietario del dominio, la dirección ip, direcciones de correo, fechas de creación y actualización de dominios.
+
+
+
+		4.16 DNSLookup
+
+			- Está disponible en muchos sistemas operativos, incluidos Windows y la mayoría de las distribuciones de Linux.
+			- La herramienta Dig, es mas completa que nslookup.
+			- Los siguientes servicios web permiten hacer una consulta dns-lookup:
+				- Servicio DNS de hacker target -> https://hackertarget.com/dns-lookup
+				
+
+
+			RESUMEN:
+
+			 - Utilizar Shodan para la obtención de información de un servidor así como los filtros que podemos usar para realizar consultas avanzadas.
+
+			 - Obtener nuestra API KEY y usar los principales servicios de shodan para realizar búsquedas específicas.
+
+			 - Utilizar Python para realizar búsquedas en Shodan tanto a través de la API REST que proporciona como de forma programática utilizando el módulo de shodan en python. En el caso del acceso programático hemos aprendido a utilizar el método shodan.search() para realizar búsquedas por una determinada cadena.
+
+			 - Utilizar el cliente de shodan desde linea de comandos.
+
+			 - Crear nuestro script ShodanSearch con el objetivo de realizar búsquedas por dirección ip utilizando el método host() y por cadena de búsqueda utilizando el método search().
+
+			 - Realizar búsquedas en Shodan para obtener servidores FTP que permiten el acceso anónimo a partir de la cadena de búsqueda "port: 21 Anonymous user logged in".
+
+			 - Utilizar el comando whois y el módulo Python-whois para obtener información de un servidor con el método whois.whois(dominio).
+
+			 - Obtener información de un dominio con el servicio domaintools utilizando el módulo requests y el parser lxml.html.
+
+			 - Utilizar el comando nslookup y el módulo DNSPython para obtener información de servidores DNS a través de los diferentes registros para consultar direcciones IP, servidores de correo y servidores de nombres utilizando el método dns.resolver.query('dominio', 'tipo_registro').
+
+			 - Por último, hemos utilizado el módulo dnspython para realizar diferentes operaciones como validar un dominio, obtener nombre de dominio a partir de la dirección ip y viceversa utilizando el submódulo dns.reversename.
+
+
+***********************************************************************************************************************************************************************
+
+	Unidad 5 -> Extracción de metadatos con Python
+
+		
+		5.1 Obtener información geográfica acerca de la localización de un servidor
+
+			- Revisamos cómo extraer información de geolocalización de una dirección IP o dominio.
+			- Una forma de obtener la geolocalización a partir una dirección IP o dominio es mediante un servicio. Ejemplo hackertarget.com -> https://hackertarget.com/geoip-ip-location-lookup
+			- Podríamos obtener la misma información en formato JSON con el servicio freegeoip -> https://ipbase.com/
+		
+		
+		5.2 Módulos de geolocalización en python
+
+			- Pygeoip es uno de los módulos disponibles en Python que le permite recuperar información geográfica a partir de una dirección IP.
+			- El módulo contiene varias funciones para recuperar datos. 
+			- Repositorio GitHub de pygeoip -> https://github.com/appliedsec/pygeoip
+			- Para construir el objeto usaremos la siguiente sentencia: (El método record_by_addr() nos devuelve información en formato diccionario que podemos recorrer con el métodos items())
+
+				 import pygeoip
+				 geolitecity = pygeoip.GeoIP('GeoLiteCity.dat')
+
+			- La salida del script anterior podria ser la siguiente:
+
+				dma_code-->807
+				area_code-->650
+				metro_code-->San Francisco, CA
+				postal_code-->94043
+				country_code-->US
+				country_code3-->USA
+				country_name-->United States
+				continent-->NA
+				region_code-->CA
+				city-->Mountain View
+				latitude-->37.41919999999999
+				longitude-->-122.0574
+				time_zone-->America/Los_Angeles
+
+
+			- Los métodos record_by_addr() y region_by_name() los podemos usar contra un archivo .dat para obtener los datos de geolocalizacion.
+			- Estos métodos nos permiten obtener, en forma de diccionario, una estructura con datos sobre el país, la ciudad, la latitud o la longitud.
+
+		
+			- La base de datos MaxMind contiene una serie de ficheros con los cuales obtener información de geolocalización.
+			- Enlaces:
+				- Sitio web Maxmind   -> https://www.maxmind.com/en/home
+				- Bases datos Maxmind -> https://dev.maxmind.com/geoip/geolite2-free-geolocation-data#Databases
+
+			- Dentro de los módulos de Python podemos encontrar los siguientes que están utilizando la base de datos MaxMind:
+				- geoip2: proporciona acceso a los servicios web y bases de datos GeoIP2. 				   Enlace -> https://github.com/maxmind/GeoIP2-python
+				- maxminddb-geolite2: proporciona una extensión para la base de datos MaxMindDB.           Enlace -> https://github.com/rr2do2/maxminddb-geolite2
+				- python-geoip-python3: proporciona acceso a los servicios web y bases de datos MaxMindDB. Enlace -> https://pypi.org/project/python-geoip-python3/
+
+			geoip2-python -> proporciona diferentes bases de datos dependiendo de los datos en los que estemos interesados. Se usa el metodo Reader() para mas informacion.
+
+				- NOTA: Para poder realizar la consulta con este módulo necesitamos que el fichero de base de datos se encuentre en la misma ruta que el script.
+
+					import geoip2.database
+					reader = geoip2.database.Reader('GeoLite2-City.mmdb')
+					response = reader.city('8.8.8.8')
+					print(response)
+
+
+			maxminddb-geolite2 -> es una biblioteca que proporciona acceso a las bases de datos GeoIP2 de MaxMind. Instalacion -> pip install maxminddb-geolite2
+
+				- Importamos la clase de geolite2
+				- Creamos una instancia con el metodo reader()
+				- Usaremos el metodo get() y le pasaremos una ip.
+
+						from geolite2 import geolite2
+						reader = geolite2.reader()
+						reader.get('8.8.8.8')
+
+
+			python-geoip-python3 -> es una biblioteca que proporciona acceso a las bases de datos GeoIP2 de MaxMind. Instalacion -> pip install python-geoip-python3
+
+				
+
+		5.3 Extracción de metadatos en documentos con el módulo PyPDF2
+
+			- Se puede instar directamente con el comando -> pip install pypdf2. Enlace: http://pypi.python.org/pypi/PyPDF2
+			- Si consultamos la ayuda del módulo, vemos que hay varias clases definidas, nosotros nos centraremos en la clase PdfFileReader.
+			- El metodo que vamos a usar para obtener la información de un documento PDF es getDocumentInfo().
+			- Para almacenar los metadatos, los ficheros PDF usan Extensible Metadata Platform (XMP)
+			- XMP se crea en XML, lo que facilita el intercambio de metadatos entre diversas aplicaciones.
+			- El módulo pypdf2 proporciona el método getXmpMetadata() para obtener otra información relacionada con el documento, como los creadores, el editor y la versión en pdf.
+			- El metodo "walk" del modulo os, es utils para recorrer todos los ficheros y directorios que se encuentran en un directorio en específico.
+			- Con el método hasattr(), comprobamos si una determinada propiedad se encuentra dentro del objeto xmpinfo, antes de acceder a esa informacion.
+		
+			- Con pdfimages, es solo para linux. Enlace -> https://manpages.ubuntu.com/manpages/focal/man1/pdfimages.1.html. $ apt-get install poppler-utils
+			
+			- Pdfimages permite extraer imágenes de documentos PDF en sistemas operativos Linux / UNIX. y guarda imágenes en formatos como Portable Pixmap (PPM), Portable Bitmap (PBM) o archivos JPEG.
+			- Para cada imagen que detecta en el documento crear un fichero con el formato nnn.xxx, donde nnn es el número de imagen y xxx es el tipo de imagen (. ppm, .pbm, .jpg).
+			- Para su ejecucion -> $ pdfimages pdf/TutorialPython3.pdf ./imagenes
+
+			- La otra alternativa es un modulo de python: pymupdf.
+			- Respositorio GitHub: https://github.com/pymupdf/PyMuPDF
+			- Instalacion en Ubuntu: https://github.com/pymupdf/PyMuPDF/wiki/Ubuntu-Installation%20Experience
+
+			- Instalacion:
+				sudo apt install python3-pip
+				sudo -H pip3 install --upgrade pip
+				sudo -H python3.6 -m pip install -U pymupdf
+
+			- La forma de usar este módulo es usando la clase fitz que dispone de métodos para abrir el fichero y extraer las imágenes en formato PNG.
+
+			- Peepdf es una herramienta de Python que analiza archivos PDF y nos permite visualizar todos los objetos incrustados en el documento.
+			- También tiene la capacidad de analizar diferentes versiones de un archivo PDF, secuencias de objetos y archivos cifrados, así como modificar y ofuscar archivos PDF.
+			- Descarga peepdf: https://eternal-todo.com/tools/peepdf-pdf-analysis-tool
+			- Ejecutar el archivo py y pasarle como parametro el PDF:
+
+				File: TutorialPython3.pdf
+				MD5: 858dfc990a4c90a5045092bc453c8746
+				SHA1: 0dff694d630cffe97aeb7d1f2e1f064d434d4b3e
+				Size: 2657251 bytes
+				Version: 1.4
+				Binary: True
+				Linearized: False
+				Encrypted: False
+				Updates: 0
+				Objects: 2539
+				Streams: 727
+				Comments: 0
+				Errors: 0
+
+
+		5.4 Extracción de metadatos en imágenes
+
+			- Exiftool: https://exiftool.org/ official page
+			- Se trata de una aplicación de código abierto que permite leer, escribir y manipular metadatos de imágenes, audio y video.
+			- Visualizar los metadatos de una gran cantidad de formatos de imágenes, como AWR, ASF, SVG, TIFF, BMP, CRW, PSD, GIF, XMP, JP2, JPEG, DNG y unos cuantos más.
+			- Formatos de metadatos soportados podemos mencionar el EXIF, GPS, IPTC, XMP, Kodak, Rico, Adobe, Vorbis, JPEG 2000, Ducky, QuickTime, Matroska y DjVu entre otros.
+			- Instalacion: $ sudo apt-get install libimage-exiftool-perl
+			- Ejecucion: $ exiftool images/image.jpg
+
+
+		5.5 Extracción de metadatos con el módulo PIL.ExifTags
+
+			- Principal módulo que encontramos dentro de Python para el procesamiento y manipulación de imágenes es: PIL.
+			- Permite extraer los metadatos de imágenes en formato EXIF. Exif(Exchange Image File Format)
+			- El módulo PIL.ExifTags permite extraer la información de estas etiquetas.
+			- ExifTags contiene una estructura de diccionario con constantes y nombres para muchas etiquetas EXIF conocidas.
+			- Documentación del módulo exiftags: https://pillow.readthedocs.io/en/latest/reference/ExifTags.html
+			- Dos clases con las que trabajar:
+				- PIL.ExifTags.TAGS    -> Permite extraer la etiquetas más comunes almacenadas en la imagen.
+				- PIL.ExifTags.GPSTAGS -> Permite extraer las etiquetas relacionadas con información de geolocalización.
+
+
+		5.6 Obtener los metadatos EXIF de una imagen
+
+			- Primero importamos los módulos PIL y PIL.ExifTags. PIL es un módulo de procesamiento de imágenes en Python que soporta diferentes formatos de archivo y tiene una poderosa capacidad de procesamiento de imágenes.
+			- Para obtener la información de EXIF tags de una imagen se puede utilizar el método _getexif() del objeto imagen.
+			- El método anterior nos devuelve una estructura tipo diccionario el cual podemos recorrer.
+		
+		5.7 Obteniendo geolocalización
+
+			- En el ejemplo anterior vemos que hemos obtenido también información en el objeto GPSInfo.
+			- Esta información se puede mejorar descodificando la información que hemos obtenido en un formato de valores latitud/longitud.
+			- A traves del modulo GPSInfo podemos parsear la informacion.
+
+		5.8 Extraer metadatos de imágenes web
+
+			- Con un script en pytho podemos conectarnos a un sitio web, descargar todas las imágenes y verificar si hay metadatos EXIF.
+			- Para eso usaremos el modulo urllib de python3 que contiene los paquetes de parse y request.
+			- Con el modulo BeautifulSoup, podemos descargar las imagenes en una carpeta.
+			- El método findImages(url) permite obtenerlas imágenes de un sitio.
+			- BeautifulSoup, realiza la petición y parsea el contenido html para obtener las imágenes.
+			- El método downloadImage(imgTag,url) permite descargar la imagen en el directorio de images.
+
+		
+		RESUMEN:
+
+			- Extraer información de geolocalización de una dirección IP o dominio con los servicios hackertarget.com y freegeoip
+
+			- Analizamos los diferentes módulos de geolocalización en python como pygeoip,geoip2,maxminddb-geolite2,python-geoip-python3. Algunos de estos módulos usan la base de datos de MaxMInd que contiene una serie de ficheros con los cuales obtener información de geolocalización.
+
+			- Extraer metadatos en documentos PDF con el módulo PyPDF2. El módulo PyPDF2 proporciona la clase PdfFileReader y los métodos getDocumentInfo(), getXmpMetadata() para obtener otra información relacionada con el documento, como los creadores, el editor y la versión en pdf. 
+
+			- Extraer imágenes de documentos PDF con herramientas como Pdfimages y el módulo pymupdf
+
+			- Extraer metadatos de imágenes con la herramienta exiftool y el módulo de python PIL.ExifTags. La clase PIL.ExifTags.TAGS permite extraer la etiquetas más comunes almacenadas en la imagen y PIL.ExifTags.GPSTAGS permite extraer las etiquetas relacionadas con información de geolocalización.
+
+			- Obtener información sobre geolocalización de imágenes gracias al uso del objeto GPSInfo
+
+
+***********************************************************************************************************************************************************************
+
+	Unidad 6 -> Web Scraping con Python
+	
+			6.1 Extracción de contenidos web con Python
+			
+				- Diferentes tecnicas para extraer contenido de las páginas web:
+				
+					- Screen scraping -> Técnica que permite obtener información moviéndote por la pantalla.
+					- Web scraping    -> Trata es obtener la información de un recurso como por ejemplo de una página web en HTML y procesa esa información para extraer datos relevantes.
+					- Report mining   -> Técnica que permite extraer informacion de archivos. No es necesario el uso de API y ni de tener conexio. Es offline.
+					- Spider          -> Es un script que pretende imitar el comportamiento de un usauaro en una web. La idea es solo escrirbir las reglas necesario y que el script recopile toda la informacion.
+					
+				- En esta unidad nos vamos a centrar en el web scraping.
+				
+				- En esta unidad revisaremos el módulo lxml junto con los parsers xml, html y el módulo BeautifulSoup.
+				
+			6.2 Parsers XML y HTML
+			
+				- El módulo lxml es un módulo que une las librerías libxml2 para análisis de documentos XML y libxslt.
+				
+					- Caracteristicas: (DOCUMENTACION -> https://lxml.de/) Se puede instar este módulo con: pip install lxml
+					    - Soporte para documentos XML y HTML.
+						- Dispone de una API basada en "ElementTree".
+						- Soporte para seleccionar elementos del documento mediante expresiones XPath.
+				- Como primer ejemplo usaremos el submodulo lxml.etree el cual proporciona un metodo XPath(), el cual soporta extensiones utilizando como sintaxis selectores XPath.
+
+				
+			6.3 Submódulo lxml.html
+
+				- El módulo lxml también provee un submódulo de Python llamado lxml.html dedicado para trabajar con HTML
+				- DOCUMENTACION -> https://lxml.de/lxmlhtml.html
+				
+			6.4 Extraer etiquetas de un sitio web con el módulo lxml
+			
+				- Antes de analizar, hay que obtener el contenido que vamos a analizar.
+				- Como pequeño ejemplo tenemos esta URL -> https://www.debian.org/releases/stable/index.en.html (DEBIAN RELEASE)
+				- Vamos a obtener la version y el nombre en clave de la ultima verion estable de Debian.
+				- La información que queremos se muestra en el título de la página y en el primer párrafo.
+				- CODIGO:
+				
+				     import requests # Con el modulo requests descargamos la página
+					 response = requests.get('https://www.debian.org/releases/stable/index.en.html')
+					 
+					 from lxml.etree import HTML # Analizamos el código fuente con un arbol ElementTree
+					 root = HTML(response.content)	# Usamos el parse HTML que tiene la libreria lxml.
+					 
+					 # La funcion anterior HTML es un acceso directo que lee el codigo HTML y produce un arbol XML como respuesta.
+					 [e.tag for e in root] # Produce esta salida ['head', 'body']
+					 
+					 # Si nos interesa el contenido de texto del elemento <title&gt; del documento html, podríamos hacerlo de la siguiente forma
+					 root.find('head').find('title').text # Su salida por pantalla es: 'Debian -- Debian "stretch" Release Information '
+					 
+			 
+				- Para obtener formulario hay que acceder al objeto forms que estará contenido dentro de la respuesta de la url.
+				
+				
+			6.5 Expresiones xpath
+			
+				- Con el objetivo de optimizar la comprobación de los elementos html, necesitamos usar XPath, que es un lenguaje de consulta que se desarrolló específicamente para XML.
+				- Con la shell de python se podria hacer esto de manera sencilla: root.xpath('body') # Como resultado [<Element body at 0x4477530>]
+				- Lo que hace es buscar hijos del elemento actual que tienen nombres de etiquetas que coinciden con el nombre de la etiqueta especificada.
+				- El elemento actual es el que llamamos xpath(), en este caso, root.
+				
+				- El elemento raíz es el elemento <html&gt; de nivel superior en el documento HTML, por lo que el elemento devuelto es el elemento <body&gt;.
+				- Por ejemplo, podemos usar expresiones xpath para encontrar solo los elementos secundarios <div&gt; dentro de <body&gt;
+				- Shell python: root.xpath('body/div') # Da como resultado [<Element div at 0x447a1e8>, <Element div at 0x447a210>, <Element div at 0x447a238>]
+				
+				- Podemos forzar una búsqueda desde la raíz del árbol añadiendo una barra diagonal al comienzo de la expresión. 
+				- Shell python: root.xpath('//h1') # Salida -> [<Element h1 at 0x447aa58>]
+				
+				- Los corchetes después de div, [@id = "content"], forman una condición que colocamos en los elementos <div&gt;.
+				- El signo @ antes de la palabra clave id significa que id se refiere a un atributo.
+				- La condición significa: obtener aquellos elementos cuyo atributo id sea igual a "content".
+				
+				- Podemos especificar solo un nombre de etiqueta: root.xpath('//div[h1]') # Respuesta -> [<Element div at 0x3d6d800>]
+				
+				- Para acceder al segundo elemento. 
+				- Shell python: root.xpath('body/div[2]') # Respuesta: [<Element div at 0x3d6d800>]
+				- Hay que tener en cuenta que estos índices comienzan en 1, a diferencia de la indexación de Python que comienza en 0.
+				
+				DOCUMENTACION -> https://www.w3.org/TR/xpath-3/
+				
+			
+			6.6 Extracción de enlaces con el módulo lxml con expresiones xpath
+			
+				- Una de las principales funcionalidades que podríamos desarrollar es la extracción de diferentes elementos html.
+				- Podríamos definir una clase llamada Scraping y definir un método por cada tipo de recurso a extraer.
+				- En este caso estamos utilizando el parser xml y expresiones regulares del tipo xpath para obtener cada uno de los recursos a extraer.
+				- Para el caso de extraer enlaces a partir de una url podemos hacer uso de la expresión xpath //a/@href.
+				- Esto nos devolverá el valor del atributo href para todos aquellos elementos correspondientes a un enlace html.
+			
+			
+			6.7 Extracción de documentos pdf con el módulo lxml con expresiones xpath
+			
+				- Para el caso de extraer documentos pdf a partir de una url podemos hacer uso de la expresión -> xpath //a[@href[contains(., ".pdf")]]/@href
+				- Esto nos devolverá el valor de atributo href para todos aquellos elementos correspondientes a un documento pdf.
+				
+				
+			6.8 Extraer contenido y etiquetas con BeautifulSoup
+			
+				- BeautifulSoup es una librería utilizada para realizar operaciones web de scraping desde Python.
+				- Se enfoca en el parseo de contenidos web como XML, HTML, JSON.
+				
+				- No está pensada directamente para scraping web.
+				- El objetivo de esta herramienta es ofrecer una interfaz que permita acceder de una manera sencilla al contenido de una página web.
+				- La hace ideal para extraer información de la web.
+				
+				- Principales caracteristicas:
+				
+					    - Parsea y permite extraer información de documentos HTML.
+						- Soporta múltiples parsers para tratar documentos XML, HTML(lxml, html5lib).
+						- Genera una estructura de árbol con todos los elementos del documento parseado.
+						- Permite buscar de una forma sencilla elementos HTML, tales como enlaces, formularios o cualquier etiqueta HTML.
+						
+				- Repositorio oficial (DOCUMENTACION): https://www.crummy.com/software/BeautifulSoup/
+				- Instalacion: pip install BeautifulSoup4
+				- Una vez instalado, el nombre del paquete es bs4. # from bs4 import BeautifulSoup #
+				
+				- Para poder realizar operaciones con un documento HTML, es necesario crear un objeto a partir de la clase bs4.BeautifulSoup ingresando un objeto de tipo str que contenga el código HTML.
+				- Hay que seleccionar el tipo de analizador que se va a usar.
+				- Ej: bs4.BeautifulSoup (<tipo de objeto str&gt;, <tipo de analizador&gt;)
+				
+				- Para crear una instancia de BeautifulSoup es necesario pasar por parámetros el contenido del documento HTML y el parser que queramos utilizar (lxml, html5lib):
+				- Shell python: bs= BeautifulSoup(contents,"lxml") # En bs tenemos todo el documento y podemos navegar por el.
+				- Si queremos acceder a la etiqueta title del documento, podríamos acceder mediante bs.title
+				
+			6.9 Método find_all() de BeautifulSoup
+			
+				- Una característica interesante de la librería es que permite buscar elementos concretos en la estructura del documento.
+				- bs.find_all(patron_busqueda) -> Este método nos permite encontrar todos los elementos HTML de un tipo determinado y nos devuelve una lista de tags que coincidan con el patrón de búsqueda.
+				- Ej: buscar todas las etiquetas meta de un documento HTML 
+				
+					     meta_tags = bs.find_all("meta")
+						 for tag in meta_tags:
+							print(tag)
+							
+				- Para buscar todos los formularios de un documento HTML
+				
+						 form_tags = bs.find_all("form")
+						 for form in form_tags:
+							print(form)
+							
+				- Para buscar todos los enlaces de un documento HTML:
+				
+						     link_tags = bs.find_all("a")
+							 for link in link_tags:
+								print(link)
+				
+				- Podemos usar el paquete re para identificar patrones comunes como correos electrónicos y URLs.
+				- Podemos especificar patrones de expresión regular para que coincidan con etiquetas específicas.
+				- Sería interesante añadir un tratamiento de excepciones y verificar si al intentar obtener una etiqueta dentro del código html.
+				- Si una determinada etiqueta no existe devolverá el objeto None, lo que facilitará este tipo de casos.
+				
+				
+			6.10 Extracción de imágenes y enlaces con el módulo bs4
+			
+				- De la misma forma que en la sección anterior hemos extraído las enlaces, documentos e imágenes con el módulo de lxml, también podemos hacerlo directamente con BeautifulSoup.
+				- PASOS A SEGUIR:
+					- Realizamos una peticion a una URL pasada por parámetro con el módulo requests.
+					- Construimos el objeto BeautifulSoup a partir del cual vamos a extraer aquellas etiquetas que sean <img&gt;
+					- Si la url es correcta, se descarga la imagen de nuevo utilizando el módulo requests.
+					- Para el caso de extraer imágenes a partir de una url podemos hacer uso del método bs.find_all("img")
+					
+
+
+				RESUMEN:
+				
+				    - Las diferentes técnicas que disponemos para extraer contenidos de la web.
+
+					- Extraer información de un sitio web mediante los parsers lxml y beautifulSoup.
+
+					- Extraer información usando los módulos lxml.etree y lxml.html que se tratan submódulos dentro de la librería lxml,
+
+					- Extraer información mediante el uso de expresiones XPath.
+
+					- Extraer contenido y etiquetas con BeautifulSoup.
+
+					- Obtener el código HTML de un sitio web y crear un objeto BeautifulSoup mediante bs4.BeautifulSoup (<codigo_html&gt;, <tipo de analizador&gt;)
+
+					- Encontrar todos los elementos HTML de un tipo determinado utilizando el método bs.find_all(patron_busqueda).
+					
+					- Extraer etiquetas meta y de contenido mediante expresiones regulares.
+					
+					- Extraer enlaces e imágenes de una url con BeautifulSoup.
+					
+					- Implementar un crawler de enlaces mediante BeautifulSoup.
+
+		
+
+
+
+Unidad 5 pág 14 falta entregar un ejercicio. extraer_pdf_metadatos.py			
+
+Unidad 6 pág 10 falta entregar un ejercicio. obtener_images_lxml.py
+Unidad 6 pág 13 falta entregar un ejercicio. obtener_dominios_iewdns.py 		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
