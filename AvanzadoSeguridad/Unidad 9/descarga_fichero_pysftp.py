@@ -1,0 +1,25 @@
+#!/usr/bin/env python3
+
+import pysftp
+import getpass
+
+HOSTNAME = 'localhost'
+PORT = 22
+
+def sftp_getfiles(username, password, hostname=HOSTNAME,port=PORT):
+    with pysftp.Connection(host=hostname, username=username, password=password) as sftp:
+        print("Conexión establecida con el servidor ... ")
+        # Define el archivo que quieres descargar del servidor
+        remoteFilePath = '/tmp/test_sftp.txt'
+        # Define el directorio local donde se debería guardar el archivo
+        localFilePath = 'test_sftp.txt'
+        sftp.get(remoteFilePath, localFilePath)
+
+# conexión se cierra automaticamente al final del bloque with
+
+if __name__ == '__main__':
+	hostname = input("Introduce el nombre del host: ")
+	port = input("Introduce el puerto: ")
+	username = input("Introduce usuario: ")
+	password = getpass.getpass(prompt="Introduce password: ")
+	sftp_getfiles(username, password, hostname, port)

